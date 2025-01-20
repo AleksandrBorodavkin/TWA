@@ -1,0 +1,20 @@
+.list {
+    background: var(--tgui--secondary_bg_color);
+    padding: 5px;
+    margin: 5px ;
+}
+.sectionCreateEventPage{
+    text-align: end;
+    padding-bottom: 1px;
+    background: var(--tgui--secondary_bg_color);
+}
+.button{
+    margin: auto;
+    display: block;
+}
+.centre{
+    text-align: center;
+}
+.form{
+    background: var(--tgui--secondary_bg_color);
+}

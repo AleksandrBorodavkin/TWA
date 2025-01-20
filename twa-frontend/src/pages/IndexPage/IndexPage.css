@@ -1,0 +1,13 @@
+.list {
+    background: var(--tgui--secondary_bg_color);
+    padding: 2px;
+}
+.centre{
+    text-align: center;
+}
+.parent-spinner {
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

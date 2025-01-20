@@ -1,0 +1,17 @@
+.list {
+    background: var(--tgui--secondary_bg_color);
+    padding: 5px;
+    margin: 5px ;
+}
+.cell{
+    margin: 2px;
+    background: var(--tgui--cell--middle--padding);
+}
+.button{
+    margin: auto;
+    display: block;
+}
+.centre{
+    text-align: center;
+    background: var(--tgui--secondary_bg_color);
+}

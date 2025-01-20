@@ -1,0 +1,18 @@
+/* Футер */
+.developer-footer {
+    background: var(--tgui--secondary_bg_color);
+    text-align: right;
+    padding: 2px;
+    font-size: 8px;
+    box-shadow: 0 -2px 3px rgba(0, 0, 0, 0.1); /* Тень сверху */
+}
+
+.developer-footer a {
+    /*color: rgba(0, 157, 255, 0.33); !* Цвет текста *!*/
+    text-decoration: none; /* Убирает подчёркивание */
+
+}
+
+.developer-footer a:hover {
+    text-decoration: underline; /* Подчёркивание при наведении */
+}

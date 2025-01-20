@@ -1,0 +1,20 @@
+{
+  "name": "twa",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "./twa-frontend",
+    "./twa-backend"
+  ],
+  "scripts": {
+    "start:frontend": "npm run dev --workspace twa-frontend",
+    "start:backend": "npm run start --workspace twa-backend",
+    "build:frontend": "npm run build --workspace twa-frontend",
+    "build:backend": "npm run build --workspace twa-backend",
+    "build": "npm run build:frontend && npm run build:backend"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "rimraf": "^5.0.0"
+  }
+}

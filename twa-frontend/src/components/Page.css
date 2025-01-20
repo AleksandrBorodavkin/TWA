@@ -1,0 +1,13 @@
+/* Основной контейнер приложения */
+.page-container {
+    display: flex;
+    flex-direction: column; /* Упорядочиваем элементы вертикально */
+    min-height: 100vh; /* Контейнер занимает всю высоту окна */
+}
+
+/* Контент */
+.page-content {
+    background: var(--tgui--secondary_bg_color);
+    flex: 1; /* Контент занимает всё доступное пространство */
+    padding: 1px; /* Отступы для содержимого */
+}
