@@ -28,8 +28,8 @@ dist-ssr
 
 participants.http
 
-.env
 .env.*
 dist-backend
 dist-frontend
 
+/twa-backend/src/.env
