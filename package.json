@@ -1,20 +1,21 @@
 {
-  "name": "twa",
+  "name": "eventify",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "./twa-frontend",
-    "./twa-backend"
+    "./frontend",
+    "./backend"
   ],
   "scripts": {
-    "start:frontend": "npm run dev --workspace twa-frontend",
-    "start:backend": "npm run start --workspace twa-backend",
-    "build:frontend": "npm run build --workspace twa-frontend",
-    "build:backend": "npm run build --workspace twa-backend",
+    "start:frontend": "npm run dev --workspace @eventify/frontend",
+    "start:backend": "npm run dev --workspace @eventify/backend",
+    "build:frontend": "npm run build --workspace @eventify/frontend",
+    "build:backend": "npm run build --workspace @eventify/backend",
     "build": "npm run build:frontend && npm run build:backend"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
-    "rimraf": "^5.0.0"
+    "rimraf": "^5.0.0",
+    "typescript": "^5.8.2"
   }
 }

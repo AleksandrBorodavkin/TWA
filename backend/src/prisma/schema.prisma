@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+//npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Модель User
+model User {
+  id           Int         @id @default(autoincrement())
+  telegramId   String      @unique
+  firstName    String
+  lastName     String?
+  userName     String?
+  languageCode String?
+  isAdmin      Boolean     @default(false)
+  isBot        Boolean     @default(false)
+  events       Event[]     @relation("UserEvent") // Связь с Event через таблицу UserEvent
+  UserEvent    UserEvent[]
+}
+
+// Модель Event
+model Event {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String
+  date        DateTime
+  users       User[]      @relation("UserEvent") // Связь с User через таблицу UserEvent
+  limit       Int
+  status      Boolean
+  UserEvent   UserEvent[]
+}
+
+// Таблица для связи многие-ко-многим между User и Event
+model UserEvent {
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id])
+  eventId Int
+  event   Event @relation(fields: [eventId], references: [id])
+
+  @@id([userId, eventId]) // Составной первичный ключ
+}

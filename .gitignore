@@ -33,3 +33,6 @@ dist-backend
 dist-frontend
 
 /twa-backend/src/.env
+/frontend/.env
+/twa-backend_old/src/.env
+/twa-backend_old/

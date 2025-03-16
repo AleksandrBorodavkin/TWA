@@ -33,6 +33,7 @@ export const EventDetails = () => {
 
     useEffect(() => {
         if (eventDetails) {
+            console.log(eventDetails)
             const userExists = eventDetails.participants.some(
                 user => Number(user.telegramId) === Number(userInfo?.id)
             );
@@ -99,6 +100,9 @@ export const EventDetails = () => {
             <Section className={'centre section'}
                      header={`${eventDetails?.title}`}>
                 <p> Количество участников: {eventDetails?.participantCount}</p>
+                <p> Лимит участников: {eventDetails?.limit}</p>
+                <p> {eventDetails?.status|| "Активное событие"}</p>
+
                 <p> {`${date.getDate()} ${date.toLocaleString("ru-RU", { month: "long" })} ${date.getFullYear()}, ${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}</p>
                 <List>
                     {eventDetails?.participants.map(participant => (

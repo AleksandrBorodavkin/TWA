@@ -17,6 +17,8 @@ interface IParticipant {
 export interface IEventDetails {
     id: number,
     title: string,
+    limit: number,
+    status: boolean,
     description: string,
     date: string,
     participantCount: string,

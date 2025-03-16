@@ -4,7 +4,7 @@ const apiDomain = import.meta.env.VITE_API_DOMAIN;
 
 export const checkMembership = async (): Promise<{ userStatus: string }> => {
     try {
-        const url = `${apiDomain}/check-user-in-group`;
+        const url = `${apiDomain}/checkMembership`;
         return await httpClient<{ userStatus: string }>(url, { method: 'GET' });
     } catch (error) {
         console.error('Error in checkMembership:', error);

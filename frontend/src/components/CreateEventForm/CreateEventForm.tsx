@@ -8,9 +8,11 @@ import {Button, Input, Textarea} from "@telegram-apps/telegram-ui";
 const apiDomain = import.meta.env.VITE_API_DOMAIN;
 
 const CreateEventForm: React.FC = () => {
-    const [title, setTitle] = useState('');
+    const [title, setTitle] = useState<string>('');
     const [date, setDate] = useState('');
-    const [description, setDescription] = useState('');
+    const [limit, setLimit] = useState<number>(0);
+    const [status, setStatus] = useState<boolean>(false);
+    const [description, setDescription] = useState<string>('');
     const [message, setMessage] = useState<string | null>(null);
     const {initDataRaw} = retrieveLaunchParams();
     const {updateCreateFormEventStatus} = useStore();
@@ -20,7 +22,7 @@ const CreateEventForm: React.FC = () => {
 
 
         try {
-            const data = {title, description, date};
+            const data = {title, description, date, limit, status};
             const response = await fetch(`${apiDomain}/events`, {
                 method: 'POST',
                 headers: {
@@ -44,7 +46,6 @@ const CreateEventForm: React.FC = () => {
             console.error(error);
         }
     };
-
     return (
 
 
@@ -53,22 +54,45 @@ const CreateEventForm: React.FC = () => {
                    placeholder="что-нибудь..."
                    type="text"
                    value={title}
-                   onChange={(e) => setTitle(e.target.value)}
+                   onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setTitle(e.target.value)}
                    required/>
             <Input
-                header="Дата:"
-                type="date"
-                id="date"
+                header="Лимит участников:"
+                type="number"
+                id="limit"
+                value={limit}
+                onChange={(e: { target: { value: React.SetStateAction<number>; }; }) => setLimit(e.target.value)}
+                required
+            />
+            <Input
+                header="Статус:"
+
+                placeholder="что-нибудь..."
+                type="checkbox"
+                id="status"
+                value={status}
+                onChange={(e: { target: {
+                        checked: boolean;
+                        value: React.SetStateAction<boolean>; }; }) => setStatus(e.target.checked)}
+                required
+            />
+            <Input
+                header="Дата и время:"
+                type="datetime-local"
+                id="datetime-local"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setDate(e.target.value)}
                 required
             />
 
-            <Textarea header="Описание"
-                      placeholder="что-нибудь..."
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      required/>
+            <Textarea
+                header="Описание"
+                value={description}
+                onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setDescription(e.target.value)}
+                required
+            />
+
+
             <Button className={'button'}
                     type="submit"
                 // mode="bezeled"

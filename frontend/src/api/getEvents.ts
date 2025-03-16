@@ -6,7 +6,7 @@ export interface IEvent {
     id: number;
     title: string;
     description: string;
-    isParticipant: boolean;
+    isParticipant?: boolean;
 }
 export const getEvents = async () => {
     try {
