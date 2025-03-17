@@ -2,7 +2,8 @@ import {Page} from '@/components/Page';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {initData} from "@telegram-apps/sdk-react";
-import {Button, List, Section, Spinner} from "@telegram-apps/telegram-ui";
+import {Button, List, Spinner} from "@telegram-apps/telegram-ui";
+import {Link} from '@/components/Link/Link';
 import './EventDetails.css'
 import {getEventDetail, IEventDetails} from "@/api/getEventDetails.ts";
 import {addUserToEvent} from "@/api/eventParticipants.ts";
@@ -97,39 +98,52 @@ export const EventDetails = () => {
 // Форматируем в читаемый вид
     return (
         <Page>
-            <Section className={'section'}
-                     header={`${eventDetails?.title}`}>
+            <div className={'section'}>
+                <div className={'header'}>
+                    {`${eventDetails?.title}`}
+                </div>
+                <br/>
 
-                <div className={"limit"}> В деле: {eventDetails?.participantCount}  |  Лимит : {eventDetails?.limit}
+                <div className={"time"}>
+                    📅 {`${date.getDate()} ${date.toLocaleString("ru-RU", {month: "long"})} ${date.getFullYear()}`}
+                    <br/>
+                    ⏰ {`${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
+                </div>
+
+                <div className={"limit"}> Мест
+                    осталось: {Number(eventDetails.limit) - Number(eventDetails.participantCount)}/{eventDetails.limit}
                 </div>
 
                 <div> {eventDetails?.status || "Активное событие"}</div>
                 <div className={"description"}> {eventDetails?.description}</div>
 
+            </div>
+            <List>
 
-                <div className={"time"} >
-                    Время проведения {`${date.getDate()} ${date.toLocaleString("ru-RU", { month: "long" })} ${date.getFullYear()}, ${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
-                </div>
-            </Section>
-                <List>
-                    {eventDetails?.participants.map(participant => (
-                        <div className={'participant'}
-                             key={participant.id}>{participant.userName}
-                        </div>
-                    ))}
-                </List>
+                {eventDetails?.participants.map((participant, index) => (
 
-                <Button
-                    className={'button'}
-                    mode="bezeled"
-                    size="m"
-                    stretched
-                    disabled={isLoading} // Отключаем кнопку на время загрузки
-                    onClick={toggleUserParticipation}
+                    <Link className={'participant'}
+                         key={index}
+                         to={'https://t.me/' + participant.userName}
+                    >
+                        {index + 1}. {participant.firstName} ( {participant.userName} )
+                    </Link>
 
-                >
-                    {sentStatus}
-                </Button>
+                ))}
+
+            </List>
+
+            <Button
+                className={'button'}
+                mode="bezeled"
+                size="m"
+                stretched
+                disabled={isLoading} // Отключаем кнопку на время загрузки
+                onClick={toggleUserParticipation}
+
+            >
+                {sentStatus}
+            </Button>
 
 
         </Page>
