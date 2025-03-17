@@ -58,4 +58,5 @@ Content-Type: application/json
   "isAdmin": true,
   "isBot": true
 }
-
+### GET request to example server
+GET https://api.telegram.org/botXXXXXXXXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/getUpdates

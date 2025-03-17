@@ -37,9 +37,11 @@ export const IndexPage: FC = () => {
             {userStatus === null ? (
                 <div className={'parent-spinner'}>
                     <Spinner size="l"/>{' '}</div>
-            ) : userStatus === 'member'
-            || userStatus === 'administrator'
-            || userStatus === 'creator' ? (
+            ) :
+                // userStatus === 'member'||
+                userStatus === 'administrator' ||
+                userStatus === 'creator'
+                    ? (
 
                 <EventsList/>
 

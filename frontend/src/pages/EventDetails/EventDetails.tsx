@@ -97,13 +97,20 @@ export const EventDetails = () => {
 // Форматируем в читаемый вид
     return (
         <Page>
-            <Section className={'centre section'}
+            <Section className={'section'}
                      header={`${eventDetails?.title}`}>
-                <p> Количество участников: {eventDetails?.participantCount}</p>
-                <p> Лимит участников: {eventDetails?.limit}</p>
-                <p> {eventDetails?.status|| "Активное событие"}</p>
 
-                <p> {`${date.getDate()} ${date.toLocaleString("ru-RU", { month: "long" })} ${date.getFullYear()}, ${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}</p>
+                <div className={"limit"}> В деле: {eventDetails?.participantCount}  |  Лимит : {eventDetails?.limit}
+                </div>
+
+                <div> {eventDetails?.status || "Активное событие"}</div>
+                <div className={"description"}> {eventDetails?.description}</div>
+
+
+                <div className={"time"} >
+                    Время проведения {`${date.getDate()} ${date.toLocaleString("ru-RU", { month: "long" })} ${date.getFullYear()}, ${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
+                </div>
+            </Section>
                 <List>
                     {eventDetails?.participants.map(participant => (
                         <div className={'participant'}
@@ -111,6 +118,7 @@ export const EventDetails = () => {
                         </div>
                     ))}
                 </List>
+
                 <Button
                     className={'button'}
                     mode="bezeled"
@@ -118,10 +126,12 @@ export const EventDetails = () => {
                     stretched
                     disabled={isLoading} // Отключаем кнопку на время загрузки
                     onClick={toggleUserParticipation}
+
                 >
                     {sentStatus}
                 </Button>
-            </Section>
+
+
         </Page>
     );
 };

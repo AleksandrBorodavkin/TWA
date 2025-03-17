@@ -25,7 +25,7 @@ export const createEvent = async (req: Request, res: Response) => {
 export const getEventsController = async (req: Request, res: Response) => {
     const telegramId = getInitData(res).user?.id;
     try {
-        const eventList = await getEventsService(telegramId);
+        const eventList = await getEventsService(String(telegramId));
         res.status(200).json(eventList);
     } catch (error: any) {
         res.status(500).json({error: error.message});

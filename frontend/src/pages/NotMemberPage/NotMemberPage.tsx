@@ -10,7 +10,7 @@ export const NotMemberPage: FC = () => {
                  className={'centre section'}>
             <Divider />
             <Placeholder
-                description="Description"
+                description="Приложение помогает регистрироваться на мероприятия и предоставляет дополнительные функции, такие как напоминания о событиях, персонализированные рекомендации и удобный доступ к деталям мероприятий."
                 header="Eventify"
             >
             </Placeholder>
