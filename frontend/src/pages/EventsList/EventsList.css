@@ -1,7 +1,8 @@
 
-.button{
+.button {
     margin: auto;
     display: block;
+    color: #0c28ff;
 }
 
 /* Основной контейнер приложения */
@@ -18,7 +19,8 @@
     border-radius: 10px;
 
 }
-.event-cell:hover{
+
+.event-cell:hover {
     background-color: rgba(255, 133, 34, 0.22);
 }
 
@@ -28,6 +30,7 @@
     text-align: left;
     width: 90%;
 }
+
 .event-status {
 
     width: 10%;
@@ -35,9 +38,35 @@
     margin-bottom: 5px;
     /*padding: -100px; !* Отступы для содержимого *!*/
 }
-.divider{
+
+.divider {
 
     margin: auto;
     display: block;
     width: 95%;
+}
+
+.section {
+    color: var(--tg-theme-link-color, blue);
+    text-align: center;
+    padding-bottom: 10px;
+    background: var(--tgui--section_bg_color);
+    border: 0px solid rgba(255, 133, 34, 0.20);
+    border-radius: 10px;
+}
+
+.button_show_hide_create_event {
+    width: 100%;
+    background-color: transparent; /* Прозрачный фон */
+    border: none; /* Убираем границу */
+    color: var(--tg-theme-link-color, blue);
+    cursor: pointer; /* Курсор в виде указателя */
+    font-size: 16px; /* Размер текста */
+    padding: 8px 16px; /* Отступы внутри кнопки */
+    border-radius: 4px; /* Скругленные углы */
+    transition: background-color 0.3s ease; /* Плавный переход для фона */
+    outline: none; /* Убираем контур при фокусе */
+}
+.button_show_hide_create_event:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Легкий фон при наведении */
 }

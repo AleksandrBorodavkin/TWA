@@ -102,41 +102,29 @@ export const EventDetails = () => {
                 <div className={'header'}>
                     {`${eventDetails?.title}`}
                 </div>
+                {eventDetails?.status && <div className={'status_true'}>Активное  </div>}
+                {!eventDetails?.status && <div className={'status_false'}>  Завершено</div>}
                 <br/>
+                <div className="info-container">
+                    <div className={"time"}>
 
-                <div className={"time"}>
-                    📅 {`${date.getDate()} ${date.toLocaleString("ru-RU", {month: "long"})} ${date.getFullYear()}`}
-                    <br/>
-                    ⏰ {`${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
+                        📅 {`${date.getDate()} ${date.toLocaleString("ru-RU", {month: "long"})} ${date.getFullYear()}`}
+                        <br/>
+                        ⏰ {`${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
+                    </div>
+
+                    <div
+                        className={"limit"}> Мест: {Number(eventDetails.limit) - Number(eventDetails.participantCount)}/{eventDetails.limit}
+                    </div>
                 </div>
 
-                <div className={"limit"}> Мест
-                    осталось: {Number(eventDetails.limit) - Number(eventDetails.participantCount)}/{eventDetails.limit}
-                </div>
-
-                <div> {eventDetails?.status || "Активное событие"}</div>
                 <div className={"description"}> {eventDetails?.description}</div>
 
             </div>
-            <List>
-
-                {eventDetails?.participants.map((participant, index) => (
-
-                    <Link className={'participant'}
-                         key={index}
-                         to={'https://t.me/' + participant.userName}
-                    >
-                        {index + 1}. {participant.firstName} ( {participant.userName} )
-                    </Link>
-
-                ))}
-
-            </List>
-
             <Button
-                className={'button'}
+                className={''}
                 mode="bezeled"
-                size="m"
+                size="s"
                 stretched
                 disabled={isLoading} // Отключаем кнопку на время загрузки
                 onClick={toggleUserParticipation}
@@ -144,6 +132,20 @@ export const EventDetails = () => {
             >
                 {sentStatus}
             </Button>
+            <List>
+
+                {eventDetails?.participants.map((participant, index) => (
+
+                    <Link className={'participant'}
+                          key={index}
+                          to={'https://t.me/' + participant.userName}
+                    >
+                        {index + 1}. {participant.firstName} ({participant.userName}) {participant.lastName}
+                    </Link>
+
+                ))}
+
+            </List>
 
 
         </Page>

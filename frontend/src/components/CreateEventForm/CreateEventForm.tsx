@@ -9,7 +9,7 @@ const apiDomain = import.meta.env.VITE_API_DOMAIN;
 const CreateEventForm: React.FC = () => {
     const [title, setTitle] = useState<string>('');
     const [date, setDate] = useState<string>('');
-    const [limit, setLimit] = useState<number>(0);
+    const [limit, setLimit] = useState<number>();
     const [status, setStatus] = useState<boolean>(true);
     const [description, setDescription] = useState<string>('');
     const [message, setMessage] = useState<string | null>(null);

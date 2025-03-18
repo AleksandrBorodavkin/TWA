@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {List, Section} from "@telegram-apps/telegram-ui";
+import {List} from "@telegram-apps/telegram-ui";
 import {Link} from '@/components/Link/Link';
 import useStore from "@/store.ts";
 import "./EventsList.css"
@@ -10,6 +10,11 @@ import CreateEventPage from "@/pages/CreateEventPage/CreateEventPage.tsx";
 export const EventsList = () => {
     const [events, setEvents] = useState<IEvent[]>([]);
     const {createFormEventStatus, userStatus} = useStore();
+    const [showCreateEventPage, setShowCreateEventPage] = useState(false);
+
+    const handleButtonClick = () => {
+        setShowCreateEventPage((prev) => !prev); // Переключаем состояние
+    };
 
 
     useEffect(() => {
@@ -21,9 +26,12 @@ export const EventsList = () => {
     }, [createFormEventStatus]);
     return (
         <div>
-            <Section className={'sectionEventList'}
-                     header='Скисок событий'
-            >
+            <div className={'section'}>
+                <div className={'header'}>
+                    Список мероприятий
+                </div>
+
+
                 <List>
                     {events.map(event => (
                         <Link key={event.id}
@@ -37,15 +45,24 @@ export const EventsList = () => {
                         </Link>
                     ))}
                 </List>
-                {
-                    userStatus === 'member' ||
-                    userStatus === 'administrator' ||
-                    userStatus === 'creator' ? (
-                        <CreateEventPage/>
+
+
+            </div>
+            <div className={'section'}>
+                <div>
+                    {userStatus === 'member' || userStatus === 'administrator' || userStatus === 'creator' ? (
+                        <>
+                            <button className={'button_show_hide_create_event'} onClick={handleButtonClick}
+                            >
+                                {showCreateEventPage ? 'Свернуть' : 'Добавить своё'}
+                            </button>
+                            {showCreateEventPage && <CreateEventPage/>}
+                        </>
                     ) : (
                         <div>У вас нет прав для добавления событий</div>
                     )}
-            </Section>
+                </div>
+            </div>
         </div>
     );
 };

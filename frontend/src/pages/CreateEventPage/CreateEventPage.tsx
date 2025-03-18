@@ -7,7 +7,7 @@ import "./CreateEventPage.css"
 const CreateEventPage = () => {
     return (
 
-            <Section header="Добавить событие"
+            <Section
                      className={'sectionCreateEventPage'}
             >
                 <CreateEventForm/>
