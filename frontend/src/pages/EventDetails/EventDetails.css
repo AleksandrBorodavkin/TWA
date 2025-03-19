@@ -12,8 +12,8 @@
     -webkit-text-fill-color: transparent;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     padding: 10px 20px;
-    border-bottom: 1px solid rgba(255, 133, 34, 0.2);
-    border-bottom-left-radius: 10px;
+    border-top: 1px solid rgba(255, 133, 34, 0.2);
+    border-top-left-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     animation: glow 2s infinite alternate;
 }
@@ -48,14 +48,14 @@
 .status_false{ color: #e53935;
     padding: 5px 5px;
     margin: 5px;
-    border-bottom: 1px solid rgba(255, 133, 34, 0.2);
-    border-bottom-left-radius: 10px;
+    border-top: 1px solid rgba(255, 133, 34, 0.2);
+    border-top-left-radius: 10px;
 }
 .status_true{
     margin: 5px;
     padding: 5px 5px;
-    border-bottom: 1px solid rgba(255, 133, 34, 0.2);
-    border-bottom-left-radius: 10px;
+    border-top: 1px solid rgba(255, 133, 34, 0.2);
+    border-top-left-radius: 10px;
 }
 .info-container {
     display: flex;
@@ -65,7 +65,7 @@
     font-weight: bold;
     padding: 5px 5px;
     border-bottom: 1px solid rgba(255, 133, 34, 0.2);
-    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
 }
 
 
@@ -74,11 +74,25 @@
     font-size: 1rem;
     font-weight: bold;
     margin: auto;
+    padding: 5px 5px;
     height: auto;
     display: block;
     text-align: left;
-    padding: 10px;
+    border-top: 1px solid rgba(255, 133, 34, 0.2);
+    border-top-left-radius: 10px;
+
 }
+
+.time {
+
+    cursor: pointer;
+}
+
+.time:hover {
+     background-color: rgba(255, 133, 34, 0.15);
+     text-align: left;
+ }
+
 
 .participant {
     width: 95%;
@@ -91,6 +105,7 @@
     border: 1px solid rgba(255, 133, 34, 0.20);
     border-radius: 7px;
     text-align: left;
+
 }
 
 .participant:hover {

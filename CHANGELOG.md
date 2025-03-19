@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Удалена устаревшая функциональность B.
 
+
 ## [0.0.1] - 2025-03-17
 ### Added
 - Первый релиз дя теста.
@@ -35,3 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Добавить вывод статуса события
 - Возможность сворачивать форму
+
+## [0.3.1] - 2025-03-19
+### Added
+- Экспорт события в формате .ics
+### Changed
+- Изменено отображение статуса

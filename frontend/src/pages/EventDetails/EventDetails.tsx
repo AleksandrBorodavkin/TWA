@@ -1,40 +1,38 @@
-import {Page} from '@/components/Page';
-import {useEffect, useState} from 'react';
-import {useParams} from 'react-router-dom';
-import {initData} from "@telegram-apps/sdk-react";
-import {Button, List, Spinner} from "@telegram-apps/telegram-ui";
-import {Link} from '@/components/Link/Link';
-import './EventDetails.css'
-import {getEventDetail, IEventDetails} from "@/api/getEventDetails.ts";
-import {addUserToEvent} from "@/api/eventParticipants.ts";
-import {removeUserFromEvent} from "@/api/removeUserFromEvent.ts";
+import { Page } from '@/components/Page';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { initData } from "@telegram-apps/sdk-react";
+import { Button, List, Spinner } from "@telegram-apps/telegram-ui";
+import { Link } from '@/components/Link/Link';
+import './EventDetails.css';
+import { getEventDetail } from "@/api/getEventDetails.ts";
+import { addUserToEvent } from "@/api/eventParticipants.ts";
+import { removeUserFromEvent } from "@/api/removeUserFromEvent.ts";
+import { generateIcsFile } from '@/utils/generateIcsFile';
+import {IEvent} from "@/types/eventTypes.ts";
 
 export const EventDetails = () => {
-
-    const [eventDetails, setEventDetails] = useState<IEventDetails | null>(null);
-    const userInfo = initData.user()
+    const [eventDetails, setEventDetails] = useState<IEvent | null>(null);
+    const userInfo = initData.user();
     const [sentStatus, setSentStatus] = useState<string>();
-    const {eventId} = useParams<{ eventId: string }>();
-    const [isLoading, setIsLoading] = useState(true); // Для управления загрузкой.
-    const [error, setError] = useState<string | null>(null); // Для обработки ошибок.
+    const { eventId } = useParams<{ eventId: string }>();
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (eventId) {
-            setIsLoading(true); // Включаем состояние загрузки.
-            setError(null); // Сбрасываем предыдущую ошибку.
+            setIsLoading(true);
+            setError(null);
 
             getEventDetail(eventId)
                 .then(event => setEventDetails(event))
                 .catch(() => setError('Не удалось загрузить детали события. Попробуйте позже.'))
-                .finally(() => setIsLoading(false)); // Выключаем загрузку.
+                .finally(() => setIsLoading(false));
         }
-
     }, [sentStatus]);
-
 
     useEffect(() => {
         if (eventDetails) {
-            console.log(eventDetails)
             const userExists = eventDetails.participants.some(
                 user => Number(user.telegramId) === Number(userInfo?.id)
             );
@@ -52,12 +50,10 @@ export const EventDetails = () => {
 
         try {
             if (sentStatus === 'Покинуть') {
-                // Удалить пользователя
-                await removeUserFromEvent(eventId, {id: userInfo.id, username: userInfo.username!});
+                await removeUserFromEvent(eventId, { id: userInfo.id, username: userInfo.username! });
                 setSentStatus('Принять участие');
             } else {
-                // Добавить пользователя
-                await addUserToEvent(eventId, {id: userInfo.id, username: userInfo.username!});
+                await addUserToEvent(eventId, { id: userInfo.id, username: userInfo.username! });
                 setSentStatus('Покинуть');
             }
         } catch (error) {
@@ -65,89 +61,89 @@ export const EventDetails = () => {
             setSentStatus('Ошибка');
         }
     };
+
+    const handleExportIcs = () => {
+        if (eventDetails) {
+            generateIcsFile(eventDetails);
+        }
+    };
+
     if (isLoading) {
-        // Этап загрузки.
         return (
-            <div style={{textAlign: 'center', marginTop: '5rem'}}>
-                <Spinner size="l"/> {/* Отображаем спиннер */}
+            <div style={{ textAlign: 'center', marginTop: '5rem' }}>
+                <Spinner size="l" />
                 <p>Загрузка...</p>
             </div>
         );
     }
 
     if (error) {
-        // Обработка ошибки.
         return (
-            <div style={{textAlign: 'center', marginTop: '5rem'}}>
-                <p style={{color: 'red'}}>{error}</p>
+            <div style={{ textAlign: 'center', marginTop: '5rem' }}>
+                <p style={{ color: 'red' }}>{error}</p>
             </div>
         );
     }
 
     if (!eventDetails) {
-        // Случай, если данных всё равно нет (на всякий случай).
         return (
-            <div style={{textAlign: 'center', marginTop: '5rem'}}>
+            <div style={{ textAlign: 'center', marginTop: '5rem' }}>
                 <p>Данные не найдены.</p>
             </div>
         );
     }
 
-
     const date = new Date(eventDetails.date);
-// Форматируем в читаемый вид
+
     return (
         <Page>
             <div className={'section'}>
                 <div className={'header'}>
                     {`${eventDetails?.title}`}
                 </div>
-                {eventDetails?.status && <div className={'status_true'}>Активное  </div>}
-                {!eventDetails?.status && <div className={'status_false'}>  Завершено</div>}
-                <br/>
+                {eventDetails?.status && <div className={'status_true'}>Активное✅</div>}
+                {!eventDetails?.status && <div className={'status_false'}>Завершено❌</div>}
+                <br />
                 <div className="info-container">
-                    <div className={"time"}>
+                    {/* Кнопка для экспорта .ics */}
 
+                    <div className={"time"}
+                         onClick={handleExportIcs}
+                    >
                         📅 {`${date.getDate()} ${date.toLocaleString("ru-RU", {month: "long"})} ${date.getFullYear()}`}
                         <br/>
                         ⏰ {`${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
                     </div>
-
-                    <div
-                        className={"limit"}> Мест: {Number(eventDetails.limit) - Number(eventDetails.participantCount)}/{eventDetails.limit}
+                    <div className={"limit"}>
+                        Мест: {Number(eventDetails.limit) - Number(eventDetails.participantCount)}/{eventDetails.limit}
                     </div>
                 </div>
-
                 <div className={"description"}> {eventDetails?.description}</div>
-
             </div>
+
             <Button
                 className={''}
                 mode="bezeled"
                 size="s"
                 stretched
-                disabled={isLoading} // Отключаем кнопку на время загрузки
+                disabled={isLoading}
                 onClick={toggleUserParticipation}
-
             >
                 {sentStatus}
             </Button>
+
+
+
             <List>
-
                 {eventDetails?.participants.map((participant, index) => (
-
                     <Link className={'participant'}
                           key={index}
                           to={'https://t.me/' + participant.userName}
                     >
                         {index + 1}. {participant.firstName} ({participant.userName}) {participant.lastName}
                     </Link>
-
                 ))}
-
             </List>
-
-
         </Page>
     );
 };
