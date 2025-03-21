@@ -7,21 +7,22 @@
 
 /* Основной контейнер приложения */
 .event-cell {
-
-    width: 95%;
-    height: 27px;
+    height: auto;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 5px;
-    margin: 5px;
-    border: 1px solid rgba(255, 133, 34, 0.22);
-    border-radius: 10px;
+    padding: 4px;
+    margin: 4px;
+
 
 }
 
 .event-cell:hover {
     background-color: rgba(255, 133, 34, 0.22);
+    background: linear-gradient(90deg, rgba(255, 126, 95, 0.03), rgba(254, 180, 123, 0.05));
+    padding: 4px;
+    margin: 4px;
+
+    /*border: 1px solid rgba(255, 133, 34, 0.20);*/
+    border-radius: 5px;
 }
 
 .event-title {
@@ -39,20 +40,17 @@
     /*padding: -100px; !* Отступы для содержимого *!*/
 }
 
-.divider {
 
-    margin: auto;
-    display: block;
-    width: 95%;
-}
 
-.section {
+.section_event_list {
     color: var(--tg-theme-link-color, blue);
     text-align: center;
-    padding-bottom: 10px;
+    padding: 3px;
+    margin: 3px;
+
     background: var(--tgui--section_bg_color);
-    border: 0px solid rgba(255, 133, 34, 0.20);
-    border-radius: 10px;
+    border: 1px solid rgba(255, 133, 34, 0.20);
+    border-radius: 5px;
 }
 
 .button_show_hide_create_event {

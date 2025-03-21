@@ -26,8 +26,8 @@ export const EventsList = () => {
     }, [createFormEventStatus]);
     return (
         <div>
-            <div className={'section'}>
-                <div className={'header'}>
+            <div className={'section_event_list'}>
+                <div className={'header '}>
                     Список мероприятий
                 </div>
 
@@ -37,7 +37,7 @@ export const EventsList = () => {
                         <Link key={event.id}
                               to={'/events/' + event.id}
                         >
-                            <div className={'event-cell'}>
+                            <div className={'event-cell border'}>
                                 <div className={'event-status'}>{event.isParticipant && "✔"}</div>
                                 <div className={'event-title'}>{event.title}</div>
 

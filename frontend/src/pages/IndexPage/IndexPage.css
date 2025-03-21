@@ -11,3 +11,37 @@
     justify-content: center;
     align-items: center;
 }
+.header {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 10px 20px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    animation: glow 2s infinite alternate;
+    margin-bottom: 1rem;
+}
+
+@keyframes glow {
+    0% {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+
+    }
+    100% {
+        text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+
+    }
+}
+
+.border {
+    border-left: 1px solid rgba(255, 133, 34, 0.20);
+    border-right: 1px solid rgba(255, 133, 34, 0.20);
+    border-radius: 7px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+}
+
