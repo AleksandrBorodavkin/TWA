@@ -2,18 +2,12 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import {
-    getUsers,
-    createUser,
     checkMembership,
     addUserToEvent,
-    deleteUserFromEventController
-} from './controllers/userController';
-import {
-    createEvent,
-    getEventByIdWithUsersController,
-    getEventsByUserTelegramIdController,
-    getEventsController
-} from "./controllers/eventController";
+    deleteUserFromEventController, getEventByIdWithUsersController, getEventsByUserTelegramIdController, createEvent,
+
+} from './controllers/Controller';
+
 import {authMiddleware} from "./middleware/authMiddleware";
 
 const app = express();
@@ -39,20 +33,20 @@ app.delete('/events/:eventId/participants', deleteUserFromEventController)
 app.get('/events/:eventId/participants',getEventByIdWithUsersController)
 
 
-app.get('/users/:telegramId/events', getEventsByUserTelegramIdController)
+// app.get('/users/:telegramId/events', getEventsByUserTelegramIdController)
 
 
 
 // // Эндпоинты для User
-app.get('/users', getUsers);
+// app.get('/users', getUsers);
 // app.get('/users/:id', getUserById);
-app.post('/users', createUser);
+// app.post('/users', addUser);
 // app.post('/users_event', addUserToEvent);
 // app.put('/users/:id', updateUser);
 // app.delete('/users/:id', deleteUser);
 //
 // // Эндпоинты для Event
-app.get('/events', getEventsController);
+app.get('/events', getEventsByUserTelegramIdController);
 // app.get('/events/:id', getEventById);
 app.post('/events', createEvent);
 // app.put('/events/:id', updateEvent);

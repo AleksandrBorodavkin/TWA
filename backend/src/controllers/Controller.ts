@@ -1,39 +1,57 @@
 import {Request, Response, RequestHandler} from 'express';
-import {addOrFindUser, addUserToEventService, deleteUserFromEventService, findUsersInDB} from '../services/userService';
+import {
+    addUserToEventService,
+    deleteUserFromEventService,
+    createEventService,
+    getEventByIdWithUsersService,
+    getEventsByUserTelegramIdService
+} from "../services/Service";
 import {IUser} from "../interfaces/IUser";
+import {IEvent} from "../interfaces/IEvent";
 import {getInitData} from "../middleware/authMiddleware";
 import axios from "axios";
 
-export const getUsers = async (req: Request, res: Response) => {
+
+
+export const createEvent = async (req: Request, res: Response) => {
+    let event: IEvent = req.body;
+    const currentUser = getInitData(res).user
     try {
-        const result = await findUsersInDB();
+        const result = await createEventService(event, currentUser);
         res.status(200).json(result);
     } catch (error: any) {
         if (error.code === 'P2002') {
-            res.status(409).json({error: 'User with this telegramId already exists.'});
+            res.status(409).json({error: 'Event with this telegramId already exists.'});
         } else {
             res.status(500).json({error: error.message});
         }
     }
+};
+export const getEventsByUserTelegramIdController = async (req: Request, res: Response) => {
+    const telegramId = getInitData(res).user?.id;
+    try {
+        const eventList = await getEventsByUserTelegramIdService(String(telegramId));
+        res.status(200).json(eventList);
+    } catch (error: any) {
+        res.status(500).json({error: error.message});
+    }
+
 };
 
-export const createUser = async (req: Request, res: Response) => {
-     const user= getInitData(res).user
+export const getEventByIdWithUsersController = async (req: Request, res: Response) => {
+    const {eventId} = req.params;
     try {
-        const result = await addOrFindUser(user);
+        const result = await getEventByIdWithUsersService(eventId);
         res.status(200).json(result);
     } catch (error: any) {
         if (error.code === 'P2002') {
-            res.status(409).json({error: 'User with this telegramId already exists.'});
+            res.status(409).json({error: 'Event with this telegramId already exists.'});
         } else {
             res.status(500).json({error: error.message});
         }
     }
-};
-export const addUserToEvent = async (
-    req: Request,
-    res: Response
-) => {
+}
+export const addUserToEvent = async (req: Request, res: Response) => {
     try {
         const result = await addUserToEventService(req, res);
         res.status(200).json(result);
@@ -47,14 +65,10 @@ export const addUserToEvent = async (
     }
 };
 
-export const deleteUserFromEventController = async (
-    req: Request<{ eventId: string }>,
-    res: Response
-) => {
+export const deleteUserFromEventController = async (req: Request<{ eventId: string }>, res: Response) => {
     try {
         const { eventId } = req.params;
         const telegramId = getInitData(res).user.id;
-        // const telegramId = "123456789";
 
         if (!eventId || !telegramId) {
             return res.status(400).json({ error: 'Event ID and Telegram ID are required' });
@@ -71,12 +85,10 @@ export const deleteUserFromEventController = async (
 
 export const checkMembership = async (req: Request, res: Response) => {
     try {
-        // Извлечение ID пользователя
         const userId = getInitData(res).user?.id;
-
         if (!userId) throw new Error('User ID not found in init data');
 
-        // Шаг 4: Проверка членства в чате
+        // Проверка членства в чате
         const response = await axios.get(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/getChatMember`, {
             params: {
                 chat_id: process.env.CHAT_ID,
@@ -88,7 +100,6 @@ export const checkMembership = async (req: Request, res: Response) => {
         res.json({userStatus: status});
     } catch (error) {
 
-        console.error('Error:', error);
         res.status(500).json({error: 'Failed to check user status in group'});
     }
 };

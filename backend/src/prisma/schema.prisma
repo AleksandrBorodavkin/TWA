@@ -8,7 +8,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  // output   = "../node_modules/.prisma/client"
+  output   = "../../node_modules/@prisma/client" // Adjust this path as needed
 }
 
 datasource db {
@@ -18,21 +18,24 @@ datasource db {
 
 // Модель User
 model User {
-  id           Int         @id @default(autoincrement())
-  telegramId   String      @unique
-  firstName    String
-  lastName     String?
-  userName     String?
-  languageCode String?
-  isAdmin      Boolean     @default(false)
-  isBot        Boolean     @default(false)
-  events       Event[]     @relation("UserEvent") // Связь с Event через таблицу UserEvent
-  UserEvent    UserEvent[]
+  id              Int         @id @default(autoincrement())
+  telegramId      String      @unique
+  allowsWriteToPm Boolean
+  firstName       String
+  lastName        String?
+  userName        String?
+  languageCode    String?
+  photoUrl        String?
+  events          Event[]     @relation("UserEvent") // Связь с Event через таблицу UserEvent
+  UserEvent       UserEvent[]
+  Event           Event[]
 }
 
 // Модель Event
 model Event {
   id          Int         @id @default(autoincrement())
+  creatorId   Int // Связь с User
+  creator     User        @relation(fields: [creatorId], references: [id])
   title       String
   description String
   date        DateTime

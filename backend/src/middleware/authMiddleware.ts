@@ -22,7 +22,7 @@ function setInitData(res: Response, initData: any): void {
  * @returns Init data stored in the Response object. Can return undefined in case,
  * the client is not authorized.
  */
-export function getInitData(res: Response): any | undefined {
+function getInitData(res: Response): any | undefined {
     // console.log('res.locals.initData---------------------------------------------------', res.locals.initData)
     return res.locals.initData;
 }
@@ -33,7 +33,7 @@ export function getInitData(res: Response): any | undefined {
  * @param res - Response object.
  * @param next - function to call the next middleware.
  */
-export const authMiddleware: RequestHandler = (req, res, next) => {
+const authMiddleware: RequestHandler = (req, res, next) => {
     // We expect passing init data in the Authorization header in the following format:
     // <auth-type> <auth-data>
     // <auth-type> must be "tma", and <auth-data> is Telegram Mini Apps init data.
@@ -68,4 +68,4 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
  * @param next - function to call the next middleware.
  */
 
-export default { authMiddleware, getInitData };
+export { authMiddleware, getInitData };

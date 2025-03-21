@@ -7,4 +7,5 @@ export interface IEvent {
     date: string; // date всегда строка
     participantCount: string;
     participants: [];
+    creator: {  };
 }
