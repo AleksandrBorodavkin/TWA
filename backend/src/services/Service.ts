@@ -5,9 +5,6 @@ import {getInitData} from "../middleware/authMiddleware";
 import {IEvent} from "../interfaces/IEvent";
 
 
-
-
-
 const prisma = new PrismaClient();
 
 export const createEventService = async (event: IEvent, currentUser:any) => {
@@ -65,10 +62,10 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
             },
         }
     })
-    console.log(event);
     return {
         id: event?.id,
         title: event?.title,
+        creator: event?.creator,
         limit: event?.limit,
         status: event?.status,
         description: event?.description,
@@ -77,10 +74,12 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
         participants: event?.UserEvent.map(userEvent => ({
             id: userEvent.user.id,
             telegramId: userEvent.user.telegramId,
+            allowsWriteToPm:userEvent.user.allowsWriteToPm,
             firstName: userEvent.user.firstName,
             lastName: userEvent.user.lastName,
             userName: userEvent.user.userName,
             languageCode: userEvent.user.languageCode,
+            photoUrl: userEvent.user.photoUrl,
         })),
     }
 }

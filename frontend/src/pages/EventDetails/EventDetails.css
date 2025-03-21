@@ -12,8 +12,6 @@
     -webkit-text-fill-color: transparent;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     padding: 10px 20px;
-    border-top: 1px solid rgba(255, 133, 34, 0.2);
-    border-top-left-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     animation: glow 2s infinite alternate;
 }
@@ -29,34 +27,41 @@
     }
 }
 
+.creator {
+    margin: auto;
+    display: flex;
+    align-items: center;
+    gap:10px;
+    width: 70%;
+
+}
+
+.border {
+    border-left: 1px solid rgba(255, 133, 34, 0.20);
+    border-right: 1px solid rgba(255, 133, 34, 0.20);
+    border-radius: 10px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+}
+
 .button {
     margin: auto;
     display: block;
+
 }
 
 
 .description {
-    border: 0 solid rgba(255, 133, 34, 0.20);
-    border-radius: 7px;
     margin: auto;
     height: auto;
     display: block;
     text-align: left;
-    padding: 10px;
+    padding-left: 1rem;
+    padding-right: 1rem;
 
 }
-.status_false{ color: #e53935;
-    padding: 5px 5px;
-    margin: 5px;
-    border-top: 1px solid rgba(255, 133, 34, 0.2);
-    border-top-left-radius: 10px;
-}
-.status_true{
-    margin: 5px;
-    padding: 5px 5px;
-    border-top: 1px solid rgba(255, 133, 34, 0.2);
-    border-top-left-radius: 10px;
-}
+
 .info-container {
     display: flex;
     gap: 20px; /* Расстояние между элементами */
@@ -64,8 +69,6 @@
     font-size: 1rem;
     font-weight: bold;
     padding: 5px 5px;
-    border-bottom: 1px solid rgba(255, 133, 34, 0.2);
-    border-top-left-radius: 10px;
 }
 
 
@@ -78,8 +81,7 @@
     height: auto;
     display: block;
     text-align: left;
-    border-top: 1px solid rgba(255, 133, 34, 0.2);
-    border-top-left-radius: 10px;
+
 
 }
 
@@ -88,38 +90,40 @@
     cursor: pointer;
 }
 
-.time:hover {
-     background-color: rgba(255, 133, 34, 0.15);
-     text-align: left;
- }
-
 
 .participant {
-    width: 95%;
+
     height: auto;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     padding: 4px;
     margin: 4px;
-    border: 1px solid rgba(255, 133, 34, 0.20);
-    border-radius: 7px;
+
     text-align: left;
+    border-left: 1px solid rgba(255, 133, 34, 0.20);
+    border-right: 1px solid rgba(255, 133, 34, 0.20);
+    border-radius: 5px;
 
 }
 
 .participant:hover {
-    background-color: rgba(255, 133, 34, 0.15);
+    background: linear-gradient(90deg, rgba(255, 126, 95, 0.03), rgba(254, 180, 123, 0.05));
     padding: 4px;
     margin: 4px;
     text-align: left;
+    border: 1px solid rgba(255, 133, 34, 0.20);
+    border-radius: 5px;
 }
 
-.section {
+.section-details {
     color: var(--tg-theme-link-color, blue);
     text-align: center;
-    padding-bottom: 10px;
-    background: var(--tgui--section_bg_color);
-    border: 0px solid rgba(255, 133, 34, 0.20);
+
     border-radius: 10px;
+    background: var(--tgui--section_bg_color);
+    margin: 5px 2px;
+    padding: 2px;
+
 }
+

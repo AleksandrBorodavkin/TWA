@@ -97,19 +97,26 @@ export const EventDetails = () => {
 
     return (
         <Page>
-            <div className={'section'}>
-                <div className={'header'}>
+            <div className={'section-details'}>
+                <div className={'header border'}>
                     {`${eventDetails?.title}`}
                 </div>
-                {eventDetails?.status && <div className={'status_true'}>Активное✅</div>}
-                {!eventDetails?.status && <div className={'status_false'}>Завершено❌</div>}
-                <br />
-                <div className="info-container">
+                <div className={'info-container border'}>
+                    <div className={' creator'}>
+                        <img
+                            src={eventDetails.creator.photoUrl}
+                            alt="User Avatar"
+                            style={{width: '25px', height: '25px', borderRadius: '50%'}}
+                        />
+                        <span>Организатор: {eventDetails.creator.firstName} {eventDetails.creator.lastName}</span>
+                        <Link to={'https://t.me/' + eventDetails.creator.userName} style={{textDecoration: 'none'}}>
+                            💬
+                        </Link>
+                    </div>
+                </div>
+                <div className="info-container border">
                     {/* Кнопка для экспорта .ics */}
-
-                    <div className={"time"}
-                         onClick={handleExportIcs}
-                    >
+                    <div className={"time"} onClick={handleExportIcs}>
                         📅 {`${date.getDate()} ${date.toLocaleString("ru-RU", {month: "long"})} ${date.getFullYear()}`}
                         <br/>
                         ⏰ {`${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
@@ -118,7 +125,7 @@ export const EventDetails = () => {
                         Мест: {Number(eventDetails.limit) - Number(eventDetails.participantCount)}/{eventDetails.limit}
                     </div>
                 </div>
-                <div className={"description"}> {eventDetails?.description}</div>
+                <div className={"description border"}> {eventDetails?.description}</div>
             </div>
 
             <Button
@@ -133,14 +140,13 @@ export const EventDetails = () => {
             </Button>
 
 
-
             <List>
                 {eventDetails?.participants.map((participant, index) => (
                     <Link className={'participant'}
                           key={index}
                           to={'https://t.me/' + participant.userName}
                     >
-                        {index + 1}. {participant.firstName} ({participant.userName}) {participant.lastName}
+                        {index + 1}. {participant.firstName} {participant.lastName} ({participant.userName})
                     </Link>
                 ))}
             </List>
