@@ -31,7 +31,13 @@ export const httpClient = async <T>(
 
         // Проверяем статус ответа
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+            // Пытаемся извлечь сообщение об ошибке из тела ответа
+            const errorResponse = await response.json();
+            if (errorResponse.error) {
+                throw new Error(errorResponse.error);
+            } else {
+                throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+            }
         }
 
         // Если есть данные, парсим JSON

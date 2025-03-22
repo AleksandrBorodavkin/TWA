@@ -7,7 +7,7 @@ interface IParticipant {
     languageCode: string;
     photoUrl: string;
     allowsWriteToPm: boolean;
-
+    participationCount: number;
 }
 
 export interface IEvent {
@@ -19,5 +19,6 @@ export interface IEvent {
     description: string,
     date: string,
     participantCount: string,
+    totalParticipantsCount:number,
     participants: IParticipant[]
 }

@@ -7,7 +7,7 @@ import {IEvent} from "../interfaces/IEvent";
 
 const prisma = new PrismaClient();
 
-export const createEventService = async (event: IEvent, currentUser:any) => {
+export const createEventService = async (event: IEvent, currentUser: any) => {
 
     const newUser = await findOrCreateUser(currentUser)
     const newEvent = await prisma.event.create({
@@ -53,7 +53,7 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
         where: {
             id: parseInt(eventId),
         },
-        include:{
+        include: {
             creator: true, // Включаем создателя события
             UserEvent: {
                 include: {
@@ -62,6 +62,12 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
             },
         }
     })
+    if (!event) {
+        throw new Error('Event not found');
+    }
+
+    const totalParticipantsCount  = event.UserEvent.reduce((sum, userEvent) => sum + userEvent.count, 0);
+    // console.log('UserEvent:', participantCount);
     return {
         id: event?.id,
         title: event?.title,
@@ -70,16 +76,16 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
         status: event?.status,
         description: event?.description,
         date: event?.date, // Преобразуем дату в строку
-        participantCount: event?.UserEvent.length.toString(), // Количество участников
+        totalParticipantsCount : totalParticipantsCount , // Количество участников
         participants: event?.UserEvent.map(userEvent => ({
             id: userEvent.user.id,
             telegramId: userEvent.user.telegramId,
-            allowsWriteToPm:userEvent.user.allowsWriteToPm,
+            allowsWriteToPm: userEvent.user.allowsWriteToPm,
             firstName: userEvent.user.firstName,
             lastName: userEvent.user.lastName,
             userName: userEvent.user.userName,
             languageCode: userEvent.user.languageCode,
-            photoUrl: userEvent.user.photoUrl,
+            participationCount: userEvent.count,
         })),
     }
 }
@@ -119,6 +125,14 @@ export const addUserToEventService = async (req: Request, res: Response) => {
         where: {id: parseInt(eventId)},
     });
 
+    // Получаем данные о событии
+    const eventDetails = await getEventByIdWithUsersService(eventId.toString());
+
+    // Проверяем, не превышен ли лимит
+    if (eventDetails.totalParticipantsCount >= eventDetails.limit) {
+        throw new Error('Лимит участников достигнут. Невозможно добавить нового участника.');
+    }
+
     if (!event) {
         return res.status(404).json({error: 'Event not found'});
     }
@@ -143,22 +157,48 @@ export const addUserToEventService = async (req: Request, res: Response) => {
         });
     }
 
-    // Добавляем пользователя в событие
-    const newParticipant = await prisma.userEvent.create({
-        data: {
-            userId: user.id,
-            eventId: event.id,
+    const existingParticipation = await prisma.userEvent.findUnique({
+        where: {
+            userId_eventId: {
+                userId: user.id,
+                eventId: event.id,
+            },
         },
     });
 
-    return {newParticipant: newParticipant, message: 'User added to event'};
+    let newParticipation;
+    if (existingParticipation) {
+        // Если пользователь уже участвует, увеличиваем счетчик
+        newParticipation = await prisma.userEvent.update({
+            where: {
+                userId_eventId: {
+                    userId: user.id,
+                    eventId: event.id,
+                },
+            },
+            data: {
+                count: existingParticipation.count + 1,
+            },
+        });
+    } else {
+        // Если пользователь не участвует, создаем новую запись
+        newParticipation = await prisma.userEvent.create({
+            data: {
+                userId: user.id,
+                eventId: event.id,
+                count: 1,
+            },
+        });
+    }
+
+    return {newParticipant: newParticipation, newEvent:event, message: 'User added to event'};
 
 };
 
 export const deleteUserFromEventService = async (eventId: number, telegramId: string) => {
     // Найти мероприятие по ID
     const event = await prisma.event.findUnique({
-        where: { id: eventId }
+        where: {id: eventId}
     });
     if (!event) {
         throw new Error('Event not found');
@@ -166,7 +206,7 @@ export const deleteUserFromEventService = async (eventId: number, telegramId: st
 
     // Найти пользователя по telegramId
     const user = await prisma.user.findUnique({
-        where: { telegramId: String(telegramId) }
+        where: {telegramId: String(telegramId)}
     });
     if (!user) {
         throw new Error('User not found');
@@ -195,5 +235,5 @@ export const deleteUserFromEventService = async (eventId: number, telegramId: st
         }
     });
 
-    return { success: true ,message: 'User deleted from event'};
+    return {success: true, message: 'User deleted from event'};
 };

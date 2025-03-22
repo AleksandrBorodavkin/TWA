@@ -1,23 +1,26 @@
-import { Page } from '@/components/Page';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { initData } from "@telegram-apps/sdk-react";
-import { Button, List, Spinner } from "@telegram-apps/telegram-ui";
-import { Link } from '@/components/Link/Link';
+import {Page} from '@/components/Page';
+import {useEffect, useState} from 'react';
+import {useParams} from 'react-router-dom';
+import {initData} from "@telegram-apps/sdk-react";
+import {Button, List, Spinner} from "@telegram-apps/telegram-ui";
+import {Link} from '@/components/Link/Link';
 import './EventDetails.css';
-import { getEventDetail } from "@/api/getEventDetails.ts";
-import { addUserToEvent } from "@/api/eventParticipants.ts";
-import { removeUserFromEvent } from "@/api/removeUserFromEvent.ts";
-import { generateIcsFile } from '@/utils/generateIcsFile';
+import {getEventDetail} from "@/api/getEventDetails.ts";
+import {addUserToEvent} from "@/api/eventParticipants.ts";
+import {removeUserFromEvent} from "@/api/removeUserFromEvent.ts";
+import {generateIcsFile} from '@/utils/generateIcsFile';
 import {IEvent} from "@/types/eventTypes.ts";
 
 export const EventDetails = () => {
     const [eventDetails, setEventDetails] = useState<IEvent | null>(null);
-    const userInfo = initData.user();
+    const currentUser = initData.user();
     const [sentStatus, setSentStatus] = useState<string>();
-    const { eventId } = useParams<{ eventId: string }>();
+    const [buttonParticipantCount, setButtonParticipantCount] = useState<number | null>();
+    const {eventId} = useParams<{ eventId: string }>();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [limitOfParticipantsExceeded, setLimitOfParticipantsExceeded] = useState<boolean>(false);
+    const [isAddingParticipation, setIsAddingParticipation] = useState(false);
 
     useEffect(() => {
         if (eventId) {
@@ -25,40 +28,85 @@ export const EventDetails = () => {
             setError(null);
 
             getEventDetail(eventId)
-                .then(event => setEventDetails(event))
+                .then(event => {
+                    setEventDetails(event);
+
+                    // Проверка лимита участников
+                    if (event.totalParticipantsCount >= event.limit) {
+                        setLimitOfParticipantsExceeded(true);
+                    } else {
+                        setLimitOfParticipantsExceeded(false);
+                    }
+                })
                 .catch(() => setError('Не удалось загрузить детали события. Попробуйте позже.'))
                 .finally(() => setIsLoading(false));
         }
-    }, [sentStatus]);
+    }, [sentStatus, buttonParticipantCount]);
 
     useEffect(() => {
         if (eventDetails) {
             const userExists = eventDetails.participants.some(
-                user => Number(user.telegramId) === Number(userInfo?.id)
+                user => Number(user.telegramId) === Number(currentUser?.id)
             );
+            const currentUserParticipation = eventDetails.participants.find(
+                participant => participant.telegramId.toString() === currentUser?.id.toString()
+            );
+            console.log(currentUserParticipation)
+            // console.log(eventDetails)
 
             if (userExists) {
-                setSentStatus('Покинуть');
+                setSentStatus('Уйти');
+
+
+                const currentUserParticipationCount = currentUserParticipation?.participationCount || 0;
+                setButtonParticipantCount(currentUserParticipationCount)
             } else {
                 setSentStatus('Принять участие');
             }
         }
-    }, [eventDetails, userInfo]);
+    }, [eventDetails, buttonParticipantCount]);
 
     const toggleUserParticipation = async () => {
-        if (!eventId || !userInfo) return;
+        if (!eventId || !currentUser) return;
 
         try {
-            if (sentStatus === 'Покинуть') {
-                await removeUserFromEvent(eventId, { id: userInfo.id, username: userInfo.username! });
+            if (sentStatus === 'Уйти') {
+                await removeUserFromEvent(eventId, {id: currentUser.id, username: currentUser.username!});
                 setSentStatus('Принять участие');
+                setButtonParticipantCount(undefined)
+                setLimitOfParticipantsExceeded(false)
             } else {
-                await addUserToEvent(eventId, { id: userInfo.id, username: userInfo.username! });
-                setSentStatus('Покинуть');
+                await addUserToEvent(eventId, {id: currentUser.id, username: currentUser.username!});
+                setSentStatus('Уйти');
+                setLimitOfParticipantsExceeded(false)
+
+
             }
         } catch (error) {
             console.error('Request error:', error);
             setSentStatus('Ошибка');
+        }
+    };
+
+    const addParticipation = async () => {
+        if (!eventId || !currentUser || isAddingParticipation) return;
+        setIsAddingParticipation(true);
+
+        try {
+            const newParticipant = await addUserToEvent(eventId, {id: currentUser.id, username: currentUser.username!});
+            setButtonParticipantCount(newParticipant.newParticipant.count);
+
+            // Обновление данных о событии
+            const updatedEvent = await getEventDetail(eventId);
+            setEventDetails(updatedEvent);
+        } catch (error) {
+            if (error.message === 'Лимит участников достигнут. Невозможно добавить нового участника.') {
+                setLimitOfParticipantsExceeded(true);
+            } else {
+                console.error('Произошла ошибка:', error);
+            }
+        } finally {
+            setIsAddingParticipation(false);
         }
     };
 
@@ -70,8 +118,8 @@ export const EventDetails = () => {
 
     if (isLoading) {
         return (
-            <div style={{ textAlign: 'center', marginTop: '5rem' }}>
-                <Spinner size="l" />
+            <div style={{textAlign: 'center', marginTop: '5rem'}}>
+                <Spinner size="l"/>
                 <p>Загрузка...</p>
             </div>
         );
@@ -79,15 +127,15 @@ export const EventDetails = () => {
 
     if (error) {
         return (
-            <div style={{ textAlign: 'center', marginTop: '5rem' }}>
-                <p style={{ color: 'red' }}>{error}</p>
+            <div style={{textAlign: 'center', marginTop: '5rem'}}>
+                <p style={{color: 'red'}}>{error}</p>
             </div>
         );
     }
 
     if (!eventDetails) {
         return (
-            <div style={{ textAlign: 'center', marginTop: '5rem' }}>
+            <div style={{textAlign: 'center', marginTop: '5rem'}}>
                 <p>Данные не найдены.</p>
             </div>
         );
@@ -122,22 +170,37 @@ export const EventDetails = () => {
                         ⏰ {`${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
                     </div>
                     <div className={"limit"}>
-                        Мест: {Number(eventDetails.limit) - Number(eventDetails.participantCount)}/{eventDetails.limit}
+                        Мест: {Number(eventDetails.limit) - Number(eventDetails.totalParticipantsCount)}/{eventDetails.limit}
                     </div>
                 </div>
                 <div className={"description border"}> {eventDetails?.description}</div>
             </div>
 
+            {/* Основная кнопка */}
             <Button
                 className={''}
                 mode="bezeled"
                 size="s"
-                stretched
+
                 disabled={isLoading}
                 onClick={toggleUserParticipation}
             >
                 {sentStatus}
             </Button>
+
+            {/* Кнопка +1 (только для участников) */}
+            {sentStatus === 'Уйти' && (
+                <Button
+                    className={''}
+                    mode="bezeled"
+                    size="s"
+
+                    disabled={isLoading || limitOfParticipantsExceeded || isAddingParticipation}
+                    onClick={addParticipation}
+                >
+                    ещё +1 место (мест:{buttonParticipantCount || 1})
+                </Button>
+            )}
 
 
             <List>
@@ -146,7 +209,8 @@ export const EventDetails = () => {
                           key={index}
                           to={'https://t.me/' + participant.userName}
                     >
-                        {index + 1}. {participant.firstName} {participant.lastName} ({participant.userName})
+                        <div>{index + 1}. {participant.firstName} {participant.lastName} ({participant.userName})</div>
+                        <div>Мест:{participant.participationCount}</div>
                     </Link>
                 ))}
             </List>

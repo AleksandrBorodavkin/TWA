@@ -58,9 +58,10 @@ export const addUserToEvent = async (req: Request, res: Response) => {
     } catch (error: any) {
         if (error.code === 'P2002') {
             return res.status(400).json({ error: 'User is already added to the event' });
-
+        } else if (error.message === 'Лимит участников достигнут. Невозможно добавить нового участника.') {
+            return res.status(400).json({ error: error.message });
         } else {
-            res.status(500).json({error: error.message});
+            return res.status(500).json({ error: error.message });
         }
     }
 };

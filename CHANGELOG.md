@@ -58,3 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.2] - 2025-03-22
 ### Fixed
 -fix CSS
+
+## [0.6.0] - 2025-03-23
+### Added
+- Добавить возможность дополнительного пользователя

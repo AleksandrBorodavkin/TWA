@@ -51,6 +51,7 @@ model UserEvent {
   user    User  @relation(fields: [userId], references: [id])
   eventId Int
   event   Event @relation(fields: [eventId], references: [id])
+  count   Int   @default(1) // Количество участий
 
   @@id([userId, eventId]) // Составной первичный ключ
 }
