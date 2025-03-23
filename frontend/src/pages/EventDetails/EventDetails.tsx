@@ -151,11 +151,6 @@ export const EventDetails = () => {
                 </div>
                 <div className={'info-container border'}>
                     <div className={' creator'}>
-                        <img
-                            src={eventDetails.creator.photoUrl}
-                            alt="User Avatar"
-                            style={{width: '25px', height: '25px', borderRadius: '50%'}}
-                        />
                         <span>Организатор: {eventDetails.creator.firstName} {eventDetails.creator.lastName}</span>
                         <Link to={'https://t.me/' + eventDetails.creator.userName} style={{textDecoration: 'none'}}>
                             💬
@@ -177,6 +172,7 @@ export const EventDetails = () => {
             </div>
 
             {/* Основная кнопка */}
+            <div className={"centre"}>
             <Button
                 className={''}
                 mode="bezeled"
@@ -185,7 +181,7 @@ export const EventDetails = () => {
                 disabled={isLoading}
                 onClick={toggleUserParticipation}
             >
-                {sentStatus}
+                👋 {sentStatus}
             </Button>
 
             {/* Кнопка +1 (только для участников) */}
@@ -198,9 +194,10 @@ export const EventDetails = () => {
                     disabled={isLoading || limitOfParticipantsExceeded || isAddingParticipation}
                     onClick={addParticipation}
                 >
-                    ещё +1 место (мест:{buttonParticipantCount || 1})
+                    ➕🎾 ещё +1 место (всего:{buttonParticipantCount || 1})
                 </Button>
             )}
+            </div>
 
 
             <List>

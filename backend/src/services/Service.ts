@@ -67,7 +67,6 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
     }
 
     const totalParticipantsCount  = event.UserEvent.reduce((sum, userEvent) => sum + userEvent.count, 0);
-    // console.log('UserEvent:', participantCount);
     return {
         id: event?.id,
         title: event?.title,
@@ -109,7 +108,6 @@ export const findOrCreateUser = async (currentUser: any) => {
             firstName: currentUser.first_name,
             lastName: currentUser.last_name,
             languageCode: currentUser.language_code,
-            photoUrl: currentUser.photo_url,
         },
     });
 
@@ -152,7 +150,6 @@ export const addUserToEventService = async (req: Request, res: Response) => {
                 firstName: currentUser.first_name,
                 lastName: currentUser.last_name,
                 languageCode: currentUser.language_code,
-                photoUrl: currentUser.photo_url,
             },
         });
     }

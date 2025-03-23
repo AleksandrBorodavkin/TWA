@@ -25,7 +25,6 @@ model User {
   lastName        String?
   userName        String?
   languageCode    String?
-  photoUrl        String?
   events          Event[]     @relation("UserEvent") // Связь с Event через таблицу UserEvent
   UserEvent       UserEvent[]
   Event           Event[]
