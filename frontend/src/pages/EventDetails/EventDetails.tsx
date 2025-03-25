@@ -94,12 +94,14 @@ export const EventDetails = () => {
 
         try {
             const newParticipant = await addUserToEvent(eventId, {id: currentUser.id, username: currentUser.username!});
+            // @ts-ignore
             setButtonParticipantCount(newParticipant.newParticipant.count);
 
             // Обновление данных о событии
             const updatedEvent = await getEventDetail(eventId);
             setEventDetails(updatedEvent);
         } catch (error) {
+            // @ts-ignore
             if (error.message === 'Лимит участников достигнут. Невозможно добавить нового участника.') {
                 setLimitOfParticipantsExceeded(true);
             } else {

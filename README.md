@@ -23,7 +23,7 @@ sudo -u nodejs npm install
 #Выполнить миграции
 sudo -u nodejs npm prisma generate
 # Произвести тестовый запуск в режиме отладки 
-sudo -u nodejs node /var/www/backend/index.js --debug
+sudo -u nodejs node /var/www/dist-backend/index.js --debug
 # после удачного запуска на node запустить с помощь pm2
 sudo -u nodejs pm2 delete backend
 sudo -u nodejs npm run build
@@ -53,6 +53,7 @@ ALTER USER myuser SUPERUSER;
 
 ```bash
 psql -U myuser -d mydatabase
+
 ```
 После модификации файлов нужно перезагрузить pm2. И файлы лучше редактировать когда они не заняты другим процессов.
 

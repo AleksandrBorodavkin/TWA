@@ -5,7 +5,5 @@ export interface IUser {
     lastName: string,
     userName: string,
     languageCode: string,
-    isAdmin: true,
-    isBot: true
 }
 

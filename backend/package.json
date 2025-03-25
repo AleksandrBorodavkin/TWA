@@ -14,7 +14,7 @@
     "build": "rimraf ./dist-backend && tsc --outDir ./dist-backend"
   },
   "prisma": {
-    "schema": "src/prisma/schema.prisma"
+    "schema": "./prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",

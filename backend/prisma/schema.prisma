@@ -8,7 +8,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../../node_modules/@prisma/client" // Adjust this path as needed
+  output   = "../node_modules/@prisma/client" // Adjust this path as needed
 }
 
 datasource db {
