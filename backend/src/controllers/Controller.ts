@@ -4,7 +4,8 @@ import {
     deleteUserFromEventService,
     createEventService,
     getEventByIdWithUsersService,
-    getEventsByUserTelegramIdService
+    getEventsByUserTelegramIdService,
+    changeStatusEventService
 } from "../services/Service";
 import {IUser} from "../interfaces/IUser";
 import {IEvent} from "../interfaces/IEvent";
@@ -25,6 +26,20 @@ export const createEvent = async (req: Request, res: Response) => {
         } else {
             res.status(500).json({error: error.message});
         }
+    }
+};
+// контроллер архивации
+export const changeStatusEventController = async (req: Request, res:Response) => {
+    try {
+        const eventId = Number(req.params.eventId);
+        const { status } = req.body;
+        const userId = getInitData(res).user.id // Получаем из аутентификации
+
+        const result = await changeStatusEventService(eventId, status, userId);
+        res.json(result);
+    } catch (error) {
+        // @ts-ignore
+        res.status(403).json({ error: error.message }); // 403 Forbidden для ошибок прав
     }
 };
 export const getEventsByUserTelegramIdController = async (req: Request, res: Response) => {

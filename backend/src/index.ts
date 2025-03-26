@@ -4,7 +4,11 @@ import cors from 'cors';
 import {
     checkMembership,
     addUserToEvent,
-    deleteUserFromEventController, getEventByIdWithUsersController, getEventsByUserTelegramIdController, createEvent,
+    deleteUserFromEventController,
+    getEventByIdWithUsersController,
+    getEventsByUserTelegramIdController,
+    createEvent,
+    changeStatusEventController,
 
 } from './controllers/Controller';
 
@@ -25,6 +29,8 @@ app.get('/checkMembership', checkMembership);
 
 // @ts-ignore
 app.post('/events/:eventId/participants', addUserToEvent)
+
+app.put('/events/:eventId/status',changeStatusEventController)
 
 // @ts-ignore
 app.delete('/events/:eventId/participants', deleteUserFromEventController)

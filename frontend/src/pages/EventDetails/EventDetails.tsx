@@ -10,6 +10,7 @@ import {addUserToEvent} from "@/api/eventParticipants.ts";
 import {removeUserFromEvent} from "@/api/removeUserFromEvent.ts";
 import {generateIcsFile} from '@/utils/generateIcsFile';
 import {IEvent} from "@/types/eventTypes.ts";
+import {handlerChangeStatusEvent} from "@/api/changeEventStatus.ts";
 
 export const EventDetails = () => {
     const [eventDetails, setEventDetails] = useState<IEvent | null>(null);
@@ -20,7 +21,8 @@ export const EventDetails = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [limitOfParticipantsExceeded, setLimitOfParticipantsExceeded] = useState<boolean>(false);
-    const [isAddingParticipation, setIsAddingParticipation] = useState(false);
+    const [isAddingParticipation, setIsAddingParticipation] = useState(false)
+    const [checkBoxStatus, setCheckBoxStatus] = useState(false)
 
     useEffect(() => {
         if (eventId) {
@@ -41,7 +43,7 @@ export const EventDetails = () => {
                 .catch(() => setError('Не удалось загрузить детали события. Попробуйте позже.'))
                 .finally(() => setIsLoading(false));
         }
-    }, [sentStatus, buttonParticipantCount]);
+    }, [sentStatus, buttonParticipantCount, checkBoxStatus]);
 
     useEffect(() => {
         if (eventDetails) {
@@ -51,8 +53,6 @@ export const EventDetails = () => {
             const currentUserParticipation = eventDetails.participants.find(
                 participant => participant.telegramId.toString() === currentUser?.id.toString()
             );
-            console.log(currentUserParticipation)
-            // console.log(eventDetails)
 
             if (userExists) {
                 setSentStatus('Уйти');
@@ -64,7 +64,7 @@ export const EventDetails = () => {
                 setSentStatus('Принять участие');
             }
         }
-    }, [eventDetails, buttonParticipantCount]);
+    }, [eventDetails, buttonParticipantCount, checkBoxStatus]);
 
     const toggleUserParticipation = async () => {
         if (!eventId || !currentUser) return;
@@ -117,6 +117,20 @@ export const EventDetails = () => {
             generateIcsFile(eventDetails);
         }
     };
+    const handlerStatusChange = async () => {
+        setIsLoading(true);
+        try {
+            // Убедитесь, что event.id - число
+            await handlerChangeStatusEvent(Number(eventDetails.id), !eventDetails.status);
+            setCheckBoxStatus(eventDetails?.status);
+        } catch (error) {
+            console.error("Update failed:", error);
+        } finally {
+            setIsLoading(false);
+        }
+
+    };
+
 
     if (isLoading) {
         return (
@@ -148,9 +162,28 @@ export const EventDetails = () => {
     return (
         <Page>
             <div className={'section-details'}>
-                <div className={'header border'}>
-                    {`${eventDetails?.title}`}
+                <div>
+                    <div className={'header border'}>
+                        {`${eventDetails?.title}`}
+                    </div>
+                    <div>
+
+                        {String(currentUser?.id) === eventDetails.creator.telegramId && (
+                            <div className={'border'}>
+                                <input
+                                    type="checkbox"
+                                    checked={eventDetails.status}
+                                    onChange={handlerStatusChange}
+                                    disabled={isLoading}
+                                />
+                                Архивировать
+                                {isLoading && " (Updating...)"}
+                            </div>
+                        )}
+
+                    </div>
                 </div>
+
                 <div className={'info-container border'}>
                     <div className={' creator'}>
                         <span>Организатор: {eventDetails.creator.firstName} {eventDetails.creator.lastName}</span>
@@ -167,7 +200,8 @@ export const EventDetails = () => {
                         ⏰ {`${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
                     </div>
                     <div className={"limit"}>
-                        Мест: {Number(eventDetails.limit) - Number(eventDetails.totalParticipantsCount)}/{eventDetails.limit}
+                        Мест осталось: {Number(eventDetails.limit) - Number(eventDetails.totalParticipantsCount)}<br/>
+                        Всего мест: {eventDetails.limit}
                     </div>
                 </div>
                 <div className={"description border"}> {eventDetails?.description}</div>
@@ -175,42 +209,48 @@ export const EventDetails = () => {
 
             {/* Основная кнопка */}
             <div className={"centre"}>
-            <Button
-                className={''}
-                mode="bezeled"
-                size="s"
-
-                disabled={isLoading}
-                onClick={toggleUserParticipation}
-            >
-                👋 {sentStatus}
-            </Button>
-
-            {/* Кнопка +1 (только для участников) */}
-            {sentStatus === 'Уйти' && (
                 <Button
                     className={''}
                     mode="bezeled"
                     size="s"
 
                     disabled={isLoading || limitOfParticipantsExceeded || isAddingParticipation}
-                    onClick={addParticipation}
+                    onClick={toggleUserParticipation}
                 >
-                    ➕🎾 ещё +1 место (всего:{buttonParticipantCount || 1})
+                    👋 {sentStatus}
                 </Button>
-            )}
+
+                {/* Кнопка +1 (только для участников) */}
+                {sentStatus === 'Уйти' && (
+                    <Button
+                        className={''}
+                        mode="bezeled"
+                        size="s"
+
+                        disabled={isLoading || limitOfParticipantsExceeded || isAddingParticipation}
+                        onClick={addParticipation}
+                    >
+                        ➕🎾 ещё +1 место (всего:{buttonParticipantCount || 1})
+                    </Button>
+                )}
             </div>
 
 
             <List>
                 {eventDetails?.participants.map((participant, index) => (
-                    <Link className={'participant'}
-                          key={index}
-                          to={'https://t.me/' + participant.userName}
-                    >
-                        <div>{index + 1}. {participant.firstName} {participant.lastName} ({participant.userName})</div>
-                        <div>Мест:{participant.participationCount}</div>
-                    </Link>
+                    <div className="participant" key={index}>
+                        {participant.userName && (
+                            <Link to={"https://t.me/" + participant.userName}>
+                                {index + 1}. {participant.firstName} {participant.lastName}
+                            </Link>
+                        )}
+                        {!participant.userName && (
+                            <div>
+                                {index + 1}. {participant.firstName} {participant.lastName}
+                            </div>
+                        )}
+                        <div style={{marginLeft: 'auto'}}>Мест: {participant.participationCount}</div>
+                    </div>
                 ))}
             </List>
         </Page>

@@ -36,3 +36,4 @@ dist-frontend
 /frontend/.env
 /twa-backend_old/src/.env
 /twa-backend_old/
+/backend/prisma/migrations/
