@@ -1,11 +1,26 @@
 /* Футер */
-.developer-footer {
+.footer-container{
     background: var(--tgui--secondary_bg_color);
-    text-align: right;
-    padding: 2px;
-    font-size: 8px;
-    box-shadow: 0 -2px 3px rgba(0, 0, 0, 0.1); /* Тень сверху */
+    box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.1); /* Тень сверху */
+    display: flex;
+    justify-content: center; /* центрирует элементы */
+    padding: 10px 10px;
+    align-items: center;
 }
+.div-help{
+    text-align: right;
+    font-size: small;
+    height: auto;
+    display: block;
+    align-items: center;
+}
+.div-dev{
+    font-size: small;
+    height: auto;
+    display: block;
+}
+
+
 
 .developer-footer a {
     /*color: rgba(0, 157, 255, 0.33); !* Цвет текста *!*/
