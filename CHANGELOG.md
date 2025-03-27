@@ -78,3 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Убрана отображение username в списке участников
 ### Changed
 - Теперь если у пользователя нет username, то ссылка не активна
+
+## [0.8.0] - 2025-03-26
+### Added
+- Добавлена страница вопросов и ответов
