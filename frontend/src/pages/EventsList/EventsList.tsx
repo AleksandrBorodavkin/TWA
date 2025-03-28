@@ -3,8 +3,9 @@ import {List} from "@telegram-apps/telegram-ui";
 import {Link} from '@/components/Link/Link';
 import useStore from "@/store.ts";
 import "./EventsList.css"
-import {getEvents, IEvent} from "@/api/getEvents.ts";
+import {getEvents} from "@/api/getEvents.ts";
 import CreateEventPage from "@/pages/CreateEventPage/CreateEventPage.tsx";
+import {IEvent} from "@/types/eventTypes.ts";
 
 
 export const EventsList = () => {
@@ -20,7 +21,7 @@ export const EventsList = () => {
     useEffect(() => {
 
         getEvents()
-            .then(events => setEvents(events))
+            .then(events => setEvents(events.filter(event => event.status)))
             .catch(error => console.error('Error in getEvents', error));
 
     }, [createFormEventStatus]);

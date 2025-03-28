@@ -20,12 +20,19 @@ export default defineConfig({
         mkcert(),
     ],
     build: {
-        outDir: path.resolve(__dirname, 'dist-frontend')
+        outDir: path.resolve(__dirname, 'dist-frontend'),
+        sourcemap: true,
     },
     publicDir: './public',
+
+    esbuild: {
+        sourcemap: true,
+        jsxDev: true, // Полезно для React разработки
+    },
     server: {
         // Exposes your dev server and makes it accessible for the devices in the same network.
         host: true,
     },
+
 });
 

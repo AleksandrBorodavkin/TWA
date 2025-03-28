@@ -16,15 +16,22 @@ export const HelpPage: FC = () => {
                         to="https://t.me/AleksandrBorodavkin"
 
                     >
-                         @AleksandrBorodavkin
+                        @AleksandrBorodavkin
                     </Link>
                 </div>)
             // <p> Если есть какие то вопросы напишите мне в телеграмм:  <a style={{ maxWidth: '800px'}} href="https://t.me/@AleksandrBorodavkin">@AleksandrBorodavkin</a></p>)
         },
         {
             id: 2,
-            question: 'Можно ли использовать этот компонент в проекте?',
-            answer: 'Да, этот компонент можно свободно использовать в ваших проектах.',
+            question: 'Ищите архивные мероприятия?',
+            answer: (<div className={"div-dev"}>Они тут
+                <Link
+                    to="/archive"
+
+                >
+                    📦
+                </Link>
+            </div>),
         },
         {
             id: 3,

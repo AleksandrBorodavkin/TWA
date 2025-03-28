@@ -18,6 +18,7 @@ export interface IEvent {
     status: boolean,
     description: string,
     date: string,
+    isParticipant: boolean;
     participantCount: string,
     totalParticipantsCount:number,
     participants: IParticipant[]

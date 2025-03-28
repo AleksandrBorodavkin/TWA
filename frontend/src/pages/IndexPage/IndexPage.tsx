@@ -7,6 +7,7 @@ import {NotMemberPage} from "@/pages/NotMemberPage/NotMemberPage.tsx";
 import {EventsList} from "@/pages/EventsList/EventsList.tsx";
 import {checkMembership} from "@/api/checkMembership.ts";
 import useStore from "@/store.ts";
+import {miniApp} from "@telegram-apps/sdk-react";
 
 
 export const IndexPage: FC = () => {
@@ -23,11 +24,12 @@ export const IndexPage: FC = () => {
 
             } catch (error) {
                 console.error('Error checking membership:', error);
+                miniApp.close();
             }
         };
 
         if (userStatus === null) {
-            checkUserMembership();
+            checkUserMembership()
         }
     }, [userStatus]);
 
