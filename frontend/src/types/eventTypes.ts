@@ -8,6 +8,7 @@ interface IParticipant {
     photoUrl: string;
     allowsWriteToPm: boolean;
     participationCount: number;
+    paid: boolean;
 }
 
 export interface IEvent {

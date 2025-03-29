@@ -5,7 +5,7 @@ import {
     createEventService,
     getEventByIdWithUsersService,
     getEventsByUserTelegramIdService,
-    changeStatusEventService
+    changeStatusEventService, markParticipantAsPaidService
 } from "../services/Service";
 import {IUser} from "../interfaces/IUser";
 import {IEvent} from "../interfaces/IEvent";
@@ -13,7 +13,23 @@ import {getInitData} from "../middleware/authMiddleware";
 import axios from "axios";
 
 
-
+export const markParticipantAsPaidController = async (req: Request, res: Response) => {
+    try {
+        const eventId = Number(req.params.eventId);
+        const {paid, participantTelegramId} = req.body;
+        const currentUserTelegramId = getInitData(res).user.id// Получаем из аутентификации
+        const result = await markParticipantAsPaidService(
+            eventId,
+            paid,
+            participantTelegramId,
+            currentUserTelegramId
+        );
+        res.status(200).json(result);
+    } catch (error) {
+        // @ts-ignore
+        res.status(403).json({error: error.message}); // 403 Forbidden для ошибок прав
+    }
+}
 export const createEvent = async (req: Request, res: Response) => {
     let event: IEvent = req.body;
     const currentUser = getInitData(res).user
@@ -29,17 +45,17 @@ export const createEvent = async (req: Request, res: Response) => {
     }
 };
 // контроллер архивации
-export const changeStatusEventController = async (req: Request, res:Response) => {
+export const changeStatusEventController = async (req: Request, res: Response) => {
     try {
         const eventId = Number(req.params.eventId);
-        const { status } = req.body;
+        const {status} = req.body;
         const userId = getInitData(res).user.id // Получаем из аутентификации
 
         const result = await changeStatusEventService(eventId, status, userId);
         res.json(result);
     } catch (error) {
         // @ts-ignore
-        res.status(403).json({ error: error.message }); // 403 Forbidden для ошибок прав
+        res.status(403).json({error: error.message}); // 403 Forbidden для ошибок прав
     }
 };
 export const getEventsByUserTelegramIdController = async (req: Request, res: Response) => {
@@ -72,30 +88,30 @@ export const addUserToEvent = async (req: Request, res: Response) => {
         res.status(200).json(result);
     } catch (error: any) {
         if (error.code === 'P2002') {
-            return res.status(400).json({ error: 'User is already added to the event' });
+            return res.status(400).json({error: 'User is already added to the event'});
         } else if (error.message === 'Лимит участников достигнут. Невозможно добавить нового участника.') {
-            return res.status(400).json({ error: error.message });
+            return res.status(400).json({error: error.message});
         } else {
-            return res.status(500).json({ error: error.message });
+            return res.status(500).json({error: error.message});
         }
     }
 };
 
 export const deleteUserFromEventController = async (req: Request<{ eventId: string }>, res: Response) => {
     try {
-        const { eventId } = req.params;
+        const {eventId} = req.params;
         const telegramId = getInitData(res).user.id;
 
         if (!eventId || !telegramId) {
-            return res.status(400).json({ error: 'Event ID and Telegram ID are required' });
+            return res.status(400).json({error: 'Event ID and Telegram ID are required'});
         }
 
         await deleteUserFromEventService(parseInt(eventId), String(telegramId));
 
-        return res.status(200).json({ message: 'User successfully removed from the event' });
+        return res.status(200).json({message: 'User successfully removed from the event'});
     } catch (error) {
         console.error('Error removing user from event:', error);
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({message: 'Internal Server Error'});
     }
 };
 

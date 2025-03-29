@@ -9,6 +9,7 @@ import {
     getEventsByUserTelegramIdController,
     createEvent,
     changeStatusEventController,
+    markParticipantAsPaidController,
 
 } from './controllers/Controller';
 
@@ -25,7 +26,7 @@ app.use(authMiddleware)
 
 app.get('/checkMembership', checkMembership);
 
-
+app.patch('/events/:eventId/payment', markParticipantAsPaidController)
 
 // @ts-ignore
 app.post('/events/:eventId/participants', addUserToEvent)

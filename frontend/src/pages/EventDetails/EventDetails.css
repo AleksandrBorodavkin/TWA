@@ -94,4 +94,21 @@
     padding: 2px;
 
 }
+.paid-button{
+    background-color: rgba(0, 128, 0, 0.54);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.unpaid-button {
+    background-color: rgba(255, 0, 0, 0.55);
+    color: rgb(255, 255, 255);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
 

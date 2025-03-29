@@ -1,5 +1,4 @@
 import {PrismaClient} from '@prisma/client';
-import {IUser} from "../interfaces/IUser";
 import {Request, Response} from "express";
 import {getInitData} from "../middleware/authMiddleware";
 import {IEvent} from "../interfaces/IEvent";
@@ -24,6 +23,69 @@ export const createEventService = async (event: IEvent, currentUser: any) => {
 }
 
 
+
+
+
+
+export const markParticipantAsPaidService = async (
+    eventId: number,
+    paid: boolean,
+    participantTelegramId: number,
+    currentUserTelegramId: number
+) => {
+    try {
+        // 1. Проверяем, что текущий пользователь является создателем события
+        const event = await prisma.event.findUnique({
+            where: { id: eventId },
+            select: { creatorId: true }
+        });
+
+        if (!event) {
+            throw new Error('Event not found');
+        }
+
+        const currentUser = await prisma.user.findUnique({
+            where: { telegramId: currentUserTelegramId.toString() }
+        });
+
+        if (!currentUser || event.creatorId !== currentUser.id) {
+            throw new Error('Only event creator can mark participants as paid');
+        }
+
+        // 2. Находим участника по telegramId
+        const participant = await prisma.user.findUnique({
+            where: { telegramId: participantTelegramId.toString() }
+        });
+
+        if (!participant) {
+            throw new Error('Participant not found');
+        }
+
+        // 3. Обновляем флаг paid в таблице UserEvent
+        return await prisma.userEvent.update({
+            where: {
+                userId_eventId: {
+                    userId: participant.id,
+                    eventId: eventId
+                }
+            },
+            data: {
+                paid: paid
+            },
+            include: {
+                user: true,
+                event: true
+            }
+        });
+    } catch (error) {
+        console.error('Error in markParticipantAsPaidService:', error);
+        throw error;
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+
+
 // backend/src/services/eventService.ts
 export const changeStatusEventService = async (
     eventId: number,
@@ -35,7 +97,7 @@ export const changeStatusEventService = async (
         where: {
             telegramId: String(telegramId) // Конвертируем в строку согласно схеме
         },
-        select: { id: true }
+        select: {id: true}
     });
 
     if (!user) {
@@ -44,7 +106,7 @@ export const changeStatusEventService = async (
 
     // 2. Находим событие и проверяем создателя
     const event = await prisma.event.findUnique({
-        where: { id: eventId },
+        where: {id: eventId},
         select: {
             creatorId: true
         }
@@ -127,6 +189,7 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
         totalParticipantsCount: totalParticipantsCount, // Количество участников
         participants: event?.UserEvent.map(userEvent => ({
             id: userEvent.user.id,
+            paid: userEvent.paid,
             telegramId: userEvent.user.telegramId,
             allowsWriteToPm: userEvent.user.allowsWriteToPm,
             firstName: userEvent.user.firstName,
@@ -149,7 +212,7 @@ export const findOrCreateUser = async (currentUser: any) => {
         return existingUser;
     }
 
-    const newUser = await prisma.user.create({
+    return prisma.user.create({
         data: {
             telegramId: String(currentUser.id),
             allowsWriteToPm: currentUser.allows_write_to_pm,
@@ -159,8 +222,6 @@ export const findOrCreateUser = async (currentUser: any) => {
             languageCode: currentUser.language_code,
         },
     });
-
-    return newUser;
 };
 
 export const addUserToEventService = async (req: Request, res: Response) => {
@@ -283,3 +344,5 @@ export const deleteUserFromEventService = async (eventId: number, telegramId: st
 
     return {success: true, message: 'User deleted from event'};
 };
+
+

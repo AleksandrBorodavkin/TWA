@@ -11,6 +11,7 @@ import {removeUserFromEvent} from "@/api/removeUserFromEvent.ts";
 import {generateIcsFile} from '@/utils/generateIcsFile';
 import {IEvent} from "@/types/eventTypes.ts";
 import {handlerChangeStatusEvent} from "@/api/changeEventStatus.ts";
+import {markParticipantAsPaid} from "@/api/markParticipantAsPaid.ts";
 
 export const EventDetails = () => {
     const [eventDetails, setEventDetails] = useState<IEvent | null>(null);
@@ -23,6 +24,7 @@ export const EventDetails = () => {
     const [limitOfParticipantsExceeded, setLimitOfParticipantsExceeded] = useState<boolean>(false);
     const [isAddingParticipation, setIsAddingParticipation] = useState(false)
     const [checkBoxStatus, setCheckBoxStatus] = useState(false)
+    const [refreshKey, setRefreshKey] = useState(0);
 
     useEffect(() => {
         if (eventId) {
@@ -43,7 +45,7 @@ export const EventDetails = () => {
                 .catch(() => setError('Не удалось загрузить детали события. Попробуйте позже.'))
                 .finally(() => setIsLoading(false));
         }
-    }, [sentStatus, buttonParticipantCount, checkBoxStatus]);
+    }, [sentStatus, buttonParticipantCount, checkBoxStatus, refreshKey]);
 
     useEffect(() => {
         if (eventDetails) {
@@ -130,6 +132,19 @@ export const EventDetails = () => {
         }
 
     };
+    const handlerMarkParticipantAsPaid = async (participantTelegramId: string, paid: boolean) => {
+        setIsLoading(true);
+        try {
+            // Убедитесь, что event.id - число
+            await markParticipantAsPaid(eventDetails.id, participantTelegramId, paid);
+            setRefreshKey(prev => prev + 1);
+
+        } catch (error) {
+            console.error("markParticipantAsPaid failed:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
 
     if (isLoading) {
@@ -214,7 +229,7 @@ export const EventDetails = () => {
                     mode="bezeled"
                     size="s"
 
-                    disabled={isLoading || limitOfParticipantsExceeded || isAddingParticipation}
+                    disabled={isLoading || isAddingParticipation}
                     onClick={toggleUserParticipation}
                 >
                     👋 {sentStatus}
@@ -222,7 +237,7 @@ export const EventDetails = () => {
 
                 {/* Кнопка +1 (только для участников) */}
                 {sentStatus === 'Уйти' && (
-                    <Button
+                    <><Button
                         className={''}
                         mode="bezeled"
                         size="s"
@@ -232,24 +247,39 @@ export const EventDetails = () => {
                     >
                         ➕🎾 ещё +1 место (всего:{buttonParticipantCount || 1})
                     </Button>
+
+                    </>
                 )}
             </div>
 
 
             <List>
-                {eventDetails?.participants.map((participant, index) => (
-                    <div className="participant" key={index}>
+                {eventDetails?.participants.map((participant) => (
+                    <div className="participant" key={participant.id}>
                         {participant.userName && (
                             <Link to={"https://t.me/" + participant.userName}>
-                                {index + 1}. {participant.firstName} {participant.lastName}
+                                {participant.id}. {participant.firstName} {participant.lastName}
                             </Link>
                         )}
                         {!participant.userName && (
                             <div>
-                                {index + 1}. {participant.firstName} {participant.lastName}
+                                {participant.id}. {participant.firstName} {participant.lastName}
                             </div>
                         )}
-                        <div style={{marginLeft: 'auto'}}>Мест: {participant.participationCount}</div>
+                        <div style={{marginLeft: 'auto'}}>Мест: {participant.participationCount}&nbsp;&nbsp;
+                            {String(currentUser?.id) === String(eventDetails.creator.telegramId )&& (
+                                <span key={refreshKey}>
+        <button
+            className={participant.paid ? 'paid-button' : 'unpaid-button'}
+            disabled={isLoading }
+            onClick={() => handlerMarkParticipantAsPaid(participant.telegramId, !participant.paid)}
+        >
+            {participant.paid ? '✓' : '₽'}
+        </button>
+    </span>
+                            )}
+                        </div>
+
                     </div>
                 ))}
             </List>

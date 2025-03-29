@@ -41,16 +41,19 @@ model Event {
   users       User[]      @relation("UserEvent") // Связь с User через таблицу UserEvent
   limit       Int
   status      Boolean
+  totalAmount Float       @default(0) // Общая сумма мероприятия
   UserEvent   UserEvent[]
 }
 
 // Таблица для связи многие-ко-многим между User и Event
 model UserEvent {
   userId  Int
-  user    User  @relation(fields: [userId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
   eventId Int
-  event   Event @relation(fields: [eventId], references: [id])
-  count   Int   @default(1) // Количество участий
+  event   Event   @relation(fields: [eventId], references: [id])
+  count   Int     @default(1) // Количество участий
+  paid    Boolean @default(false) // Поле для отслеживания оплаты
+  amount  Float   @default(0) // Сумма, оплаченная участником
 
   @@id([userId, eventId]) // Составной первичный ключ
 }

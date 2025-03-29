@@ -13,7 +13,6 @@ export const handlerChangeStatusEvent = async (
         const data = {
             status: newStatus,
         };
-        console.log(data)
 
         return await httpClient(url, {
             method: 'PUT',
