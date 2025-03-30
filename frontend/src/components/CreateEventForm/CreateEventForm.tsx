@@ -6,7 +6,11 @@ import {Button, Input, Textarea} from "@telegram-apps/telegram-ui";
 
 const apiDomain = import.meta.env.VITE_API_DOMAIN;
 
-const CreateEventForm: React.FC = () => {
+interface CreateEventFormProps {
+    onSuccess?: () => void;
+}
+
+const CreateEventForm: React.FC<CreateEventFormProps> = ({onSuccess}) => {
     const [title, setTitle] = useState<string>('');
     const [date, setDate] = useState<string>('');
     const [limit, setLimit] = useState<number>();
@@ -45,6 +49,10 @@ const CreateEventForm: React.FC = () => {
             setStatus(true);
 
             updateCreateFormEventStatus(title)
+
+            if (onSuccess) {
+                onSuccess();
+            }
         } catch (error) {
             setMessage('Failed to create event. Please try again.');
             console.error(error);
@@ -53,34 +61,38 @@ const CreateEventForm: React.FC = () => {
     return (
 
 
-        <form className={'form'} onSubmit={handleSubmit}>
+        <form className={'border'} onSubmit={handleSubmit}>
             <Input header="Название:"
                    placeholder="что-нибудь..."
                    type="text"
                    value={title}
                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
                    required/>
-            <Input
-                header="Лимит участников:"
-                type="number"
-                id="limit"
-                value={limit}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    const newValue = parseInt(e.target.value, 10);
-                    if (!isNaN(newValue)) {
-                        setLimit(newValue);
-                    }
-                }}
-                required
-            />
-            <Input
-                header="Статус:"
-                type="checkbox"
-                id="status"
-                checked={status}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStatus(e.target.checked)}
-                required
-            />
+
+                <Input
+                    header="Лимит :"
+                    type="number"
+                    id="limit"
+                    value={limit}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const newValue = parseInt(e.target.value, 10);
+                        if (!isNaN(newValue)) {
+                            setLimit(newValue);
+                        }
+                    }}
+                    required
+                />
+                {/*<Input*/}
+                {/*    header="Активно"*/}
+                {/*    type="checkbox"*/}
+                {/*    checked={status}*/}
+                {/*    onChange={(e) => setStatus(e.target.checked)}*/}
+                {/*    */}
+                {/*/>*/}
+
+
+
+
             <Input
                 header="Дата и время:"
                 type="datetime-local"
@@ -105,7 +117,7 @@ const CreateEventForm: React.FC = () => {
                     stretched
             >
 
-                {message ? <p>{message}</p> : <p>Create Event</p>}
+                {message ? <p>{message}</p> : <p>Создать</p>}
 
             </Button>
         </form>

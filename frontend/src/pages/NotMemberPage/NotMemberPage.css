@@ -1,9 +1,82 @@
-.centre{
-    text-align: center;
+.membership-container {
+    display: flex;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: var(--tgui--bg_color);
 }
-.section{
 
-    padding: 5px;
-    margin: 5px;
+.membership-card {
+    max-width: 600px;
+    margin: auto;
+    padding: 2rem;
 
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.emoji-header {
+    font-size: 3.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.main-heading {
+    font-size: 1.8rem;
+    text-align: center;
+    line-height: 1.4;
+    margin-bottom: 2rem;
+}
+
+.highlight {
+    display: block;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.benefits-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background-color: var(--tgui--secondary_bg_color);
+}
+
+.benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+
+}
+
+.benefits-list li {
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    background-color: var(--tgui--section_bg_color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.contact-button {
+    display: block;
+    width: fit-content;
+    margin: 1.5rem auto 0;
+    padding: 1rem 2rem;
+    background: #2d3436;
+    color: white!important;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: transform 0.2s ease;
+}
+
+.contact-button:hover {
+    transform: translateY(-2px);
+    background: #434d50;
+}
+
+.footer-note {
+    text-align: center;
+    margin-top: 2rem;
+    color: #6c757d;
+    font-size: 0.9rem;
 }

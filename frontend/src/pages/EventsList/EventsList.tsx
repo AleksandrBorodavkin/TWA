@@ -57,7 +57,7 @@ export const EventsList = () => {
                             >
                                 {showCreateEventPage ? 'Свернуть' : 'Добавить своё'}
                             </button>
-                            {showCreateEventPage && <CreateEventPage/>}
+                            {showCreateEventPage && <CreateEventPage onSuccess={handleButtonClick} />}
                         </>
                     ) : (
                         <div>У вас нет прав для добавления событий</div>

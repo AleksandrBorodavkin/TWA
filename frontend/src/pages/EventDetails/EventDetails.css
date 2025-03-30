@@ -4,6 +4,16 @@
 }
 
 
+a {
+
+    text-decoration: none;
+    color: var(--tgui--accent_text_color);
+}
+
+a:hover {
+    background-size: 100% 1px;
+
+}
 
 .creator {
     margin: auto;

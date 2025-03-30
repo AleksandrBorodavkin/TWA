@@ -1,7 +1,7 @@
 import {Page} from '@/components/Page';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
-import {initData} from "@telegram-apps/sdk-react";
+import {initData, miniApp} from "@telegram-apps/sdk-react";
 import {Button, List, Spinner} from "@telegram-apps/telegram-ui";
 import {Link} from '@/components/Link/Link';
 import './EventDetails.css';
@@ -42,7 +42,10 @@ export const EventDetails = () => {
                         setLimitOfParticipantsExceeded(false);
                     }
                 })
-                .catch(() => setError('Не удалось загрузить детали события. Попробуйте позже.'))
+                .catch(() => {
+                    setError('Не удалось загрузить детали события. Попробуйте позже.')
+                    miniApp.close()}
+                )
                 .finally(() => setIsLoading(false));
         }
     }, [sentStatus, buttonParticipantCount, checkBoxStatus, refreshKey]);
@@ -191,7 +194,7 @@ export const EventDetails = () => {
                                     onChange={handlerStatusChange}
                                     disabled={isLoading}
                                 />
-                                Архивировать
+                                {eventDetails.status ? "Мероприятие активно": "Мероприятие завершено" }
                                 {isLoading && " (Updating...)"}
                             </div>
                         )}
@@ -257,9 +260,13 @@ export const EventDetails = () => {
                 {eventDetails?.participants.map((participant) => (
                     <div className="participant" key={participant.id}>
                         {participant.userName && (
-                            <Link to={"https://t.me/" + participant.userName}>
+                            <a
+                                href={"https://t.me/" + participant.userName}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
                                 {participant.id}. {participant.firstName} {participant.lastName}
-                            </Link>
+                            </a>
                         )}
                         {!participant.userName && (
                             <div>
