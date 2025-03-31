@@ -37,7 +37,7 @@ model Event {
   creator     User        @relation(fields: [creatorId], references: [id])
   title       String
   description String
-  date        DateTime
+  date        DateTime    @db.Timestamptz // Изменяем тип на TIMESTAMPTZ
   users       User[]      @relation("UserEvent") // Связь с User через таблицу UserEvent
   limit       Int
   status      Boolean

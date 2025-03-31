@@ -3,7 +3,6 @@ import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {initData, miniApp} from "@telegram-apps/sdk-react";
 import {Button, List, Spinner} from "@telegram-apps/telegram-ui";
-import {Link} from '@/components/Link/Link';
 import './EventDetails.css';
 import {getEventDetail} from "@/api/getEventDetails.ts";
 import {addUserToEvent} from "@/api/eventParticipants.ts";
@@ -220,9 +219,16 @@ export const EventDetails = () => {
                 <div className={'info-container border'}>
                     <div className={' creator'}>
                         <span>Организатор: {eventDetails.creator.firstName} {eventDetails.creator.lastName}</span>
-                        <Link to={'https://t.me/' + eventDetails.creator.userName} style={{textDecoration: 'none'}}>
-                            💬
-                        </Link>
+
+                        {eventDetails.creator.userName && (
+                            <a
+                                href={"https://t.me/" + eventDetails.creator.userName}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                💬
+                            </a>
+                        )}
                     </div>
                 </div>
                 <div className="info-container border">
