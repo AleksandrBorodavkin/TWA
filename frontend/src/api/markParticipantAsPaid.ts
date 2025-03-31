@@ -3,7 +3,7 @@ import {httpClient} from "@/api/httpClient.ts";
 const apiDomain = import.meta.env.VITE_API_DOMAIN;
 
 export const markParticipantAsPaid = async (
-    eventId: string, participantTelegramId: string, paid: boolean) => {
+    eventId: number, participantTelegramId: string, paid: boolean) => {
 
     const url = `${apiDomain}/events/${eventId}/payment`;
 

@@ -3,15 +3,15 @@ import {httpClient} from "@/api/httpClient.ts";
 const apiDomain = import.meta.env.VITE_API_DOMAIN;
 
 export const addUserToEvent = async (
-    eventId: string,
-    userInfo: { id: number; username: string }
+    eventId: string | undefined,
+    currentUser: { id: number; username: string }
 ) => {
     const url = `${apiDomain}/events/${eventId}/participants`;
 
     try {
         const data = {
-            telegramId: userInfo.id,
-            userName: userInfo.username,
+            telegramId: currentUser.id,
+            userName: currentUser.username,
         };
 
         return await httpClient(url, {

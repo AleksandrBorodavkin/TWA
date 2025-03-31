@@ -22,7 +22,7 @@ export const EventDetails = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [limitOfParticipantsExceeded, setLimitOfParticipantsExceeded] = useState<boolean>(false);
-    const [isAddingParticipation, setIsAddingParticipation] = useState(false)
+    const [updateParticipationCount, setUpdateParticipationCount] = useState(false)
     const [checkBoxStatus, setCheckBoxStatus] = useState(false)
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -71,51 +71,57 @@ export const EventDetails = () => {
         }
     }, [eventDetails, buttonParticipantCount, checkBoxStatus]);
 
-    const toggleUserParticipation = async () => {
+    const handleParticipation = async (action: 'add' | 'remove') => {
         if (!eventId || !currentUser) return;
 
         try {
-            if (sentStatus === 'Уйти') {
-                await removeUserFromEvent(eventId, {id: currentUser.id, username: currentUser.username!});
-                setSentStatus('Принять участие');
-                setButtonParticipantCount(undefined)
-                setLimitOfParticipantsExceeded(false)
-            } else {
-                await addUserToEvent(eventId, {id: currentUser.id, username: currentUser.username!});
-                setSentStatus('Уйти');
-                setLimitOfParticipantsExceeded(false)
+            const participantData = action === 'add'
+                ? await addUserToEvent(eventId, { id: currentUser.id, username: currentUser.username! })
+                : await removeUserFromEvent(eventId, { id: currentUser.id, username: currentUser.username! });
 
 
-            }
-        } catch (error) {
-            console.error('Request error:', error);
-            setSentStatus('Ошибка');
-        }
-    };
-
-    const addParticipation = async () => {
-        if (!eventId || !currentUser || isAddingParticipation) return;
-        setIsAddingParticipation(true);
-
-        try {
-            const newParticipant = await addUserToEvent(eventId, {id: currentUser.id, username: currentUser.username!});
             // @ts-ignore
-            setButtonParticipantCount(newParticipant.newParticipant.count);
+            setButtonParticipantCount(participantData?.updatedParticipant?.count || 0);
 
-            // Обновление данных о событии
-            const updatedEvent = await getEventDetail(eventId);
-            setEventDetails(updatedEvent);
+            await refreshEventDetails();
+
+            // Если удалили, показать 'Принять участие', иначе скрыть
+            setSentStatus(action === 'remove' ? 'Принять участие' : 'Уйти');
+            setLimitOfParticipantsExceeded(false);
         } catch (error) {
+            console.error('Произошла ошибка:', error);
+
+
             // @ts-ignore
             if (error.message === 'Лимит участников достигнут. Невозможно добавить нового участника.') {
                 setLimitOfParticipantsExceeded(true);
-            } else {
-                console.error('Произошла ошибка:', error);
             }
         } finally {
-            setIsAddingParticipation(false);
+            setUpdateParticipationCount(false);
         }
     };
+
+    const updateParticipantCount = async (action: 'add' | 'remove') => {
+        if (!eventId || !currentUser || updateParticipationCount) return;
+        setUpdateParticipationCount(true);
+
+        await handleParticipation(action);
+    };
+
+    const refreshEventDetails = async () => {
+        if (!eventId) {
+            console.warn('eventId отсутствует, данные не обновлены.');
+            return; // Не обновлять, если eventId = undefined
+        }
+        try {
+            const updatedEvent = await getEventDetail(eventId);
+            setEventDetails(updatedEvent);
+        } catch (error) {
+            console.error('Ошибка при обновлении данных о событии:', error);
+        }
+    };
+
+
 
     const handleExportIcs = () => {
         if (eventDetails) {
@@ -124,8 +130,13 @@ export const EventDetails = () => {
     };
     const handlerStatusChange = async () => {
         setIsLoading(true);
+        if (!eventDetails) {
+            console.warn('eventId отсутствует, данные не обновлены.');
+            return; // Не обновлять, если eventId = undefined
+        }
         try {
             // Убедитесь, что event.id - число
+
             await handlerChangeStatusEvent(Number(eventDetails.id), !eventDetails.status);
             setCheckBoxStatus(eventDetails?.status);
         } catch (error) {
@@ -137,8 +148,12 @@ export const EventDetails = () => {
     };
     const handlerMarkParticipantAsPaid = async (participantTelegramId: string, paid: boolean) => {
         setIsLoading(true);
+        if (!eventDetails) {
+            console.warn('eventId отсутствует, данные не обновлены.');
+            return; // Не обновлять, если eventId = undefined
+        }
         try {
-            // Убедитесь, что event.id - число
+
             await markParticipantAsPaid(eventDetails.id, participantTelegramId, paid);
             setRefreshKey(prev => prev + 1);
 
@@ -194,7 +209,7 @@ export const EventDetails = () => {
                                     onChange={handlerStatusChange}
                                     disabled={isLoading}
                                 />
-                                {eventDetails.status ? "Мероприятие активно": "Мероприятие завершено" }
+                                {eventDetails.status ? "Мероприятие активно" : "Мероприятие завершено"}
                                 {isLoading && " (Updating...)"}
                             </div>
                         )}
@@ -225,39 +240,48 @@ export const EventDetails = () => {
                 <div className={"description border"}> {eventDetails?.description}</div>
             </div>
 
-            {/* Основная кнопка */}
-            <div className={"centre"}>
-                <Button
-                    className={''}
-                    mode="bezeled"
-                    size="s"
-
-                    disabled={isLoading || isAddingParticipation}
-                    onClick={toggleUserParticipation}
-                >
-                    👋 {sentStatus}
-                </Button>
-
-                {/* Кнопка +1 (только для участников) */}
-                {sentStatus === 'Уйти' && (
-                    <><Button
-                        className={''}
+            <div className="centre">
+                {sentStatus === 'Принять участие' ? (
+                    <Button
+                        className=""
                         mode="bezeled"
                         size="s"
-
-                        disabled={isLoading || limitOfParticipantsExceeded || isAddingParticipation}
-                        onClick={addParticipation}
+                        disabled={isLoading || updateParticipationCount}
+                        onClick={() => updateParticipantCount('add')}
                     >
-                        ➕🎾 ещё +1 место (всего:{buttonParticipantCount || 1})
+                        🤝 Принять участие
                     </Button>
+                ) : (
+                    <>
+                        {/* Если статус "Уйти", показать ➖ вместо основной кнопки */}
+                        <Button
+                            className=""
+                            mode="bezeled"
+                            size="s"
+                            disabled={isLoading || updateParticipationCount}
+                            onClick={() => updateParticipantCount('remove')}
+                        >
+                            ➖
+                        </Button>
 
+                        {buttonParticipantCount || 1}
+
+                        <Button
+                            className=""
+                            mode="bezeled"
+                            size="s"
+                            disabled={isLoading || limitOfParticipantsExceeded || updateParticipationCount}
+                            onClick={() => updateParticipantCount('add')}
+                        >
+                            ➕
+                        </Button>
                     </>
                 )}
             </div>
 
 
             <List>
-                {eventDetails?.participants.map((participant) => (
+                {eventDetails?.participants.map((participant, index) => (
                     <div className="participant" key={participant.id}>
                         {participant.userName && (
                             <a
@@ -265,20 +289,20 @@ export const EventDetails = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                {participant.id}. {participant.firstName} {participant.lastName}
+                                {index + 1}. {participant.firstName} {participant.lastName}
                             </a>
                         )}
                         {!participant.userName && (
                             <div>
-                                {participant.id}. {participant.firstName} {participant.lastName}
+                                {index + 1}. {participant.firstName} {participant.lastName}
                             </div>
                         )}
                         <div style={{marginLeft: 'auto'}}>Мест: {participant.participationCount}&nbsp;&nbsp;
-                            {String(currentUser?.id) === String(eventDetails.creator.telegramId )&& (
+                            {String(currentUser?.id) === String(eventDetails.creator.telegramId) && (
                                 <span key={refreshKey}>
         <button
             className={participant.paid ? 'paid-button' : 'unpaid-button'}
-            disabled={isLoading }
+            disabled={isLoading}
             onClick={() => handlerMarkParticipantAsPaid(participant.telegramId, !participant.paid)}
         >
             {participant.paid ? '✓' : '₽'}

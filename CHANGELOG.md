@@ -127,3 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Теперь футер не показывается не членам группы
 - Переработана сама страница NotMember
+
+## [0.13.0] - 2025-03-31
+### Fixed
+- Изменен принцип изменения количества участников

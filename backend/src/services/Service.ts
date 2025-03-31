@@ -1,4 +1,4 @@
-import {PrismaClient} from '@prisma/client';
+import {PrismaClient} from '.prisma/client';
 import {Request, Response} from "express";
 import {getInitData} from "../middleware/authMiddleware";
 import {IEvent} from "../interfaces/IEvent";
@@ -302,47 +302,118 @@ export const addUserToEventService = async (req: Request, res: Response) => {
 
 };
 
-export const deleteUserFromEventService = async (eventId: number, telegramId: string) => {
-    // Найти мероприятие по ID
+// export const deleteUserFromEventService = async (eventId: number, telegramId: string) => {
+//     // Найти мероприятие по ID
+//     const event = await prisma.event.findUnique({
+//         where: {id: eventId}
+//     });
+//     if (!event) {
+//         throw new Error('Event not found');
+//     }
+//
+//     // Найти пользователя по telegramId
+//     const user = await prisma.user.findUnique({
+//         where: {telegramId: String(telegramId)}
+//     });
+//     if (!user) {
+//         throw new Error('User not found');
+//     }
+//
+//     // Проверить, состоит ли пользователь в мероприятии
+//     const userEvent = await prisma.userEvent.findUnique({
+//         where: {
+//             userId_eventId: {
+//                 userId: user.id,
+//                 eventId: event.id
+//             }
+//         }
+//     });
+//     if (!userEvent) {
+//         throw new Error('User is not a participant of this event');
+//     }
+//
+//     // Удалить пользователя из мероприятия
+//     await prisma.userEvent.delete({
+//         where: {
+//             userId_eventId: {
+//                 userId: user.id,
+//                 eventId: event.id
+//             }
+//         }
+//     });
+//
+//     // return {success: true, message: 'User deleted from event'};
+//     return {newParticipant: newParticipation, newEvent: event, message: 'User added to event'};
+// };
+
+export const decreaseParticipantsService = async (telegramId: string, eventId: number) => {
+    // Проверяем, существует ли событие
     const event = await prisma.event.findUnique({
-        where: {id: eventId}
+        where: { id: eventId },
+        include: { UserEvent: true },
     });
+
     if (!event) {
-        throw new Error('Event not found');
+        throw new Error("Event not found");
     }
 
-    // Найти пользователя по telegramId
+    // Ищем пользователя по telegramId
     const user = await prisma.user.findUnique({
-        where: {telegramId: String(telegramId)}
+        where: { telegramId },
     });
+
     if (!user) {
-        throw new Error('User not found');
+        throw new Error("User not found");
     }
 
-    // Проверить, состоит ли пользователь в мероприятии
-    const userEvent = await prisma.userEvent.findUnique({
+    // Проверяем участие пользователя в событии
+    const participation = await prisma.userEvent.findUnique({
         where: {
             userId_eventId: {
                 userId: user.id,
-                eventId: event.id
-            }
-        }
+                eventId,
+            },
+        },
     });
-    if (!userEvent) {
-        throw new Error('User is not a participant of this event');
+
+    if (!participation) {
+        throw new Error("User is not participating in this event");
     }
 
-    // Удалить пользователя из мероприятия
-    await prisma.userEvent.delete({
-        where: {
-            userId_eventId: {
-                userId: user.id,
-                eventId: event.id
-            }
-        }
+    let updatedParticipation = null;
+
+    if (participation.count > 1) {
+        // Уменьшаем количество участий
+        updatedParticipation = await prisma.userEvent.update({
+            where: {
+                userId_eventId: {
+                    userId: user.id,
+                    eventId,
+                },
+            },
+            data: {
+                count: participation.count - 1,
+            },
+        });
+    } else {
+        // Если count = 1, удаляем запись
+        await prisma.userEvent.delete({
+            where: {
+                userId_eventId: {
+                    userId: user.id,
+                    eventId,
+                },
+            },
+        });
+    }
+
+    // Получаем обновленное количество участников
+    const updatedEvent = await prisma.event.findUnique({
+        where: { id: eventId },
+        include: { UserEvent: true },
     });
 
-    return {success: true, message: 'User deleted from event'};
+    return { updatedParticipant: updatedParticipation, updatedEvent, message: "User participation decreased successfully" };
 };
 
 

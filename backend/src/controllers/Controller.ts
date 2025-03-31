@@ -1,13 +1,13 @@
-import {Request, Response, RequestHandler} from 'express';
+import {Request, Response} from 'express';
 import {
     addUserToEventService,
-    deleteUserFromEventService,
     createEventService,
     getEventByIdWithUsersService,
     getEventsByUserTelegramIdService,
-    changeStatusEventService, markParticipantAsPaidService
+    changeStatusEventService,
+    markParticipantAsPaidService,
+    decreaseParticipantsService
 } from "../services/Service";
-import {IUser} from "../interfaces/IUser";
 import {IEvent} from "../interfaces/IEvent";
 import {getInitData} from "../middleware/authMiddleware";
 import axios from "axios";
@@ -97,21 +97,18 @@ export const addUserToEvent = async (req: Request, res: Response) => {
     }
 };
 
-export const deleteUserFromEventController = async (req: Request<{ eventId: string }>, res: Response) => {
+export const decreaseParticipantsController = async (req: Request, res: Response) => {
     try {
-        const {eventId} = req.params;
-        const telegramId = getInitData(res).user.id;
+        const currentUser = getInitData(res).user;
+        const { eventId } = req.params;
 
-        if (!eventId || !telegramId) {
-            return res.status(400).json({error: 'Event ID and Telegram ID are required'});
-        }
+        // Вызываем сервис для уменьшения количества участников
+        const response = await decreaseParticipantsService(String(currentUser.id), parseInt(eventId));
 
-        await deleteUserFromEventService(parseInt(eventId), String(telegramId));
-
-        return res.status(200).json({message: 'User successfully removed from the event'});
+        return res.json(response);
     } catch (error) {
-        console.error('Error removing user from event:', error);
-        return res.status(500).json({message: 'Internal Server Error'});
+        // @ts-ignore
+        return res.status(400).json({ error: error.message });
     }
 };
 

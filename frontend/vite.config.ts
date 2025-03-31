@@ -27,7 +27,7 @@ export default defineConfig({
 
     esbuild: {
         sourcemap: true,
-        jsxDev: true, // Полезно для React разработки
+        // jsxDev: true, // Полезно для React разработки
     },
     server: {
         // Exposes your dev server and makes it accessible for the devices in the same network.

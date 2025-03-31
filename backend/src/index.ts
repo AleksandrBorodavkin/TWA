@@ -4,12 +4,12 @@ import cors from 'cors';
 import {
     checkMembership,
     addUserToEvent,
-    deleteUserFromEventController,
     getEventByIdWithUsersController,
     getEventsByUserTelegramIdController,
     createEvent,
     changeStatusEventController,
     markParticipantAsPaidController,
+    decreaseParticipantsController,
 
 } from './controllers/Controller';
 
@@ -30,11 +30,11 @@ app.patch('/events/:eventId/payment', markParticipantAsPaidController)
 
 // @ts-ignore
 app.post('/events/:eventId/participants', addUserToEvent)
+// @ts-ignore
+app.patch('/events/:eventId/participants', decreaseParticipantsController)
 
 app.put('/events/:eventId/status',changeStatusEventController)
 
-// @ts-ignore
-app.delete('/events/:eventId/participants', deleteUserFromEventController)
 
     // Мероприятие с всеми участниками
 app.get('/events/:eventId/participants',getEventByIdWithUsersController)
