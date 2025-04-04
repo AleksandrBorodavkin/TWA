@@ -6,7 +6,8 @@
   "homepage": "",
   "scripts": {
     "dev": "vite",
-    "build": "rimraf ./dist-frontend && tsc --noEmit && vite build --mode production",
+    "build:Omerta": "rimraf ./dist-frontend-omerta && tsc --noEmit && vite build --mode omerta",
+    "build:Chosen": "rimraf ./dist-frontend-chosen && tsc --noEmit && vite build --mode chosen",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
     "preview": "vite preview",

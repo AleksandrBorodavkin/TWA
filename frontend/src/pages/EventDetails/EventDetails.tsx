@@ -1,7 +1,7 @@
 import {Page} from '@/components/Page';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
-import {initData, miniApp} from "@telegram-apps/sdk-react";
+import {initData} from "@telegram-apps/sdk-react";
 import {Button, List, Spinner} from "@telegram-apps/telegram-ui";
 import './EventDetails.css';
 import {getEventDetail} from "@/api/getEventDetails.ts";
@@ -43,7 +43,8 @@ export const EventDetails = () => {
                 })
                 .catch(() => {
                     setError('Не удалось загрузить детали события. Попробуйте позже.')
-                    miniApp.close()}
+                    // miniApp.close()
+                    }
                 )
                 .finally(() => setIsLoading(false));
         }
@@ -234,9 +235,9 @@ export const EventDetails = () => {
                 <div className="info-container border">
                     {/* Кнопка для экспорта .ics */}
                     <div className={"time"} onClick={handleExportIcs}>
-                        📅 {`${date.getDate()} ${date.toLocaleString("ru-RU", {month: "long"})} ${date.getFullYear()}`}
+                        📅 {`${date.getUTCDate()} ${date.toLocaleString("ru-RU", { month: "long", timeZone: "UTC" })} ${date.getUTCFullYear()}`}
                         <br/>
-                        ⏰ {`${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`}
+                        ⏰ {`${date.getUTCHours()}:${String(date.getUTCMinutes()).padStart(2, "0")}`}
                     </div>
                     <div className={"limit"}>
                         Мест осталось: {Number(eventDetails.limit) - Number(eventDetails.totalParticipantsCount)}<br/>

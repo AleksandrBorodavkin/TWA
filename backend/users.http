@@ -43,7 +43,7 @@ Content-Type: application/json
 }
 
 ### GET request to example server
-GET http://localhost:3000/events
+GET http://localhost:3002/events
 
 ###
 POST http://localhost:3000/events/1/participants
