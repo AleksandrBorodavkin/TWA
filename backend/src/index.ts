@@ -14,14 +14,19 @@ import {
 } from './controllers/Controller';
 
 import {authMiddleware} from "./middleware/authMiddleware";
+import {bot, setupBot} from "../bot";
+import {webhookCallback} from "grammy";
+import axios from "axios";
 
 const app = express();
 const port = process.env.PORT || 3000;
+require("dotenv").config();
 
+setupBot();
+app.use(express.json());
+app.use("/bot", webhookCallback(bot, "express"));
 app.use(helmet())
 app.use(cors())
-require("dotenv").config();
-app.use(express.json());
 app.use(authMiddleware)
 
 app.get('/checkMembership', checkMembership);
@@ -64,6 +69,17 @@ app.post('/events', createEvent);
 // app.delete('/users/:userId/events/:eventId', removeUserFromEvent);
 
 // Запуск сервера
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log(`Server is running on http://localhost:${port}`);
+    // Установка webhook
+    try {
+        const webhookUrl = process.env.WEBHOOK_URL;
+        const response = await axios.post(
+            `https://api.telegram.org/bot${bot.token}/setWebhook`,
+            {url: webhookUrl}
+        );
+        console.log("Webhook установлен:", response.data);
+    } catch (err: any) {
+        console.error("Ошибка установки webhook:", err.response?.data || err.message);
+    }
 });

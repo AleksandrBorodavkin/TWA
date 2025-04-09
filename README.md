@@ -1,5 +1,63 @@
-### Start Backend prod
+# Start Backend prod
 
+## VPS
+
+### Fail2Ban
+```sh
+sudo apt update
+sudo apt install fail2ban -y
+
+
+```
+
+### Базовая настройка (jail.local)
+
+Fail2Ban использует конфигурационные файлы в /etc/fail2ban/.
+Основной файл — jail.conf, но его нельзя редактировать напрямую (он перезаписывается при обновлениях).
+
+Создайте jail.local для своих настроек:
+```sh
+sudo cp /etc/fail2ban/jail.{conf,local}
+sudo nano /etc/fail2ban/jail.local
+```
+Основные параметры (глобальные настройки):
+```yaml
+[DEFAULT]
+# Блокировка на 1 час (3600 секунд)
+bantime = 3600
+
+# Макс. число попыток перед блокировкой
+maxretry = 3
+
+# Время, за которое считаются попытки (10 минут)
+findtime = 10m
+
+# Игнорировать IP (можно добавить свой)
+ignoreip = 127.0.0.1/8 ::1
+```
+Настройка защиты SSH (по умолчанию включена)
+
+```yaml
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = %(sshd_log)s
+maxretry = 3
+bantime = 1h
+```
+Перезапуск Fail2Ban
+
+```sh
+sudo systemctl restart fail2ban
+```
+Мониторьте логи
+```bash
+sudo tail -f /var/log/fail2ban.log
+```
+
+
+## Установка 
 ```bash
 #Установить зависимости 
 sudo -u nodejs npm install

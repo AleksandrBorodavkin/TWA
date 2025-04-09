@@ -25,7 +25,7 @@ export function App() {
 
       } catch (error) {
         console.error('Error checking membership:', error);
-        miniApp.close();
+        // miniApp.close();
       }
     };
 
