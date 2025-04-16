@@ -1,16 +1,16 @@
 import {Request, Response} from 'express';
 import {
-    addUserToEventService,
     createEventService,
     getEventByIdWithUsersService,
     getEventsByUserTelegramIdService,
     changeStatusEventService,
     markParticipantAsPaidService,
-    decreaseParticipantsService
 } from "../services/Service";
 import {IEvent} from "../interfaces/IEvent";
 import {getInitData} from "../middleware/authMiddleware";
 import axios from "axios";
+import {decreaseParticipantsService} from "../services/decreaseParticipantsService";
+import {addUserToEventService} from "../services/addUserToEventService";
 
 
 export const markParticipantAsPaidController = async (req: Request, res: Response) => {
@@ -44,6 +44,8 @@ export const createEvent = async (req: Request, res: Response) => {
         }
     }
 };
+
+
 // контроллер архивации
 export const changeStatusEventController = async (req: Request, res: Response) => {
     try {
@@ -85,7 +87,7 @@ export const getEventByIdWithUsersController = async (req: Request, res: Respons
 export const addUserToEvent = async (req: Request, res: Response) => {
     try {
         const result = await addUserToEventService(req, res);
-        res.status(200).json(result);
+        return res.status(200).json(result);
     } catch (error: any) {
         if (error.code === 'P2002') {
             return res.status(400).json({error: 'User is already added to the event'});

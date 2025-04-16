@@ -42,8 +42,8 @@ export const EventDetails = () => {
                     }
                 })
                 .catch(() => {
-                    setError('Не удалось загрузить детали события. Попробуйте позже.')
-                    // miniApp.close()
+                        setError('Не удалось загрузить детали события. Попробуйте позже.')
+                        // miniApp.close()
                     }
                 )
                 .finally(() => setIsLoading(false));
@@ -63,7 +63,9 @@ export const EventDetails = () => {
                 setSentStatus('Уйти');
 
 
-                const currentUserParticipationCount = currentUserParticipation?.participationCount || 0;
+                const currentUserParticipationCount =
+                    currentUserParticipation?.mainParticipantsCount
+                    + currentUserParticipation?.reserveParticipantsCount || 0;
                 setButtonParticipantCount(currentUserParticipationCount)
             } else {
                 setSentStatus('Принять участие');
@@ -76,12 +78,16 @@ export const EventDetails = () => {
 
         try {
             const participantData = action === 'add'
-                ? await addUserToEvent(eventId, { id: currentUser.id, username: currentUser.username! })
-                : await removeUserFromEvent(eventId, { id: currentUser.id, username: currentUser.username! });
+                ? await addUserToEvent(eventId, {id: currentUser.id, username: currentUser.username!})
+                : await removeUserFromEvent(eventId, {id: currentUser.id, username: currentUser.username!});
 
 
-            // @ts-ignore
-            setButtonParticipantCount(participantData?.updatedParticipant?.count || 0);
+//             // @ts-ignore
+//             const mainCount = participantData?.newParticipant?.mainParticipantsCount || 0;
+// // @ts-ignore
+//             const reserveCount = participantData?.newParticipant?.reserveParticipantsCount || 0;
+//
+//             setButtonParticipantCount(mainCount + reserveCount);
 
             await refreshEventDetails();
 
@@ -120,7 +126,6 @@ export const EventDetails = () => {
             console.error('Ошибка при обновлении данных о событии:', error);
         }
     };
-
 
 
     const handleExportIcs = () => {
@@ -217,17 +222,21 @@ export const EventDetails = () => {
                     </div>
                 </div>
 
-                <div className={'info-container border'}>
-                    <div className={' creator'}>
-                        <span>Организатор: {eventDetails.creator.firstName} {eventDetails.creator.lastName}</span>
+                <div className="organizer-container border">
+                    <div className="organizer-info">
+                        <span className="organizer-label">Организатор:</span>
+                        <span className="organizer-name">
+      {eventDetails.creator.firstName} {eventDetails.creator.lastName}
+    </span>
 
                         {eventDetails.creator.userName && (
                             <a
-                                href={"https://t.me/" + eventDetails.creator.userName}
+                                href={`https://t.me/${eventDetails.creator.userName}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                className="organizer-contact"
                             >
-                                💬
+                                <span className="telegram-icon">💬</span>
                             </a>
                         )}
                     </div>
@@ -235,14 +244,22 @@ export const EventDetails = () => {
                 <div className="info-container border">
                     {/* Кнопка для экспорта .ics */}
                     <div className={"time"} onClick={handleExportIcs}>
-                        📅 {`${date.getUTCDate()} ${date.toLocaleString("ru-RU", { month: "long", timeZone: "UTC" })} ${date.getUTCFullYear()}`}
+                        📅 {`${date.getUTCDate()} ${date.toLocaleString("ru-RU", {
+                        month: "long",
+                        timeZone: "UTC"
+                    })} ${date.getUTCFullYear()}`}
                         <br/>
                         ⏰ {`${date.getUTCHours()}:${String(date.getUTCMinutes()).padStart(2, "0")}`}
                     </div>
-                    <div className={"limit"}>
-                        Мест осталось: {Number(eventDetails.limit) - Number(eventDetails.totalParticipantsCount)}<br/>
-                        Всего мест: {eventDetails.limit}
+                    <div className="limit">
+                        Мест занято: {
+                        eventDetails.participants.reduce((sum, p) => sum + p.mainParticipantsCount, 0)
+                    } / {eventDetails.limit} <br/>
+                        В резерве: {
+                        eventDetails.participants.reduce((sum, p) => sum + p.reserveParticipantsCount, 0)
+                    }
                     </div>
+
                 </div>
                 <div className={"description border"}> {eventDetails?.description}</div>
             </div>
@@ -250,37 +267,36 @@ export const EventDetails = () => {
             <div className="centre">
                 {sentStatus === 'Принять участие' ? (
                     <Button
-                        className=""
+                        className={limitOfParticipantsExceeded ? 'red-button' : ''}
                         mode="bezeled"
                         size="s"
                         disabled={isLoading || updateParticipationCount}
                         onClick={() => updateParticipantCount('add')}
                     >
-                        🤝 Принять участие
+                        {limitOfParticipantsExceeded ? '🚫 Мест нет (в резерв)' : '🤝 Принять участие'}
                     </Button>
                 ) : (
                     <>
                         {/* Если статус "Уйти", показать ➖ вместо основной кнопки */}
                         <Button
-                            className=""
-                            mode="bezeled"
+                            mode="plain"
                             size="s"
                             disabled={isLoading || updateParticipationCount}
                             onClick={() => updateParticipantCount('remove')}
                         >
-                            ➖
+                            &nbsp;➖&nbsp;
                         </Button>
-
+                        &nbsp;
                         {buttonParticipantCount || 1}
-
+                        &nbsp;
                         <Button
-                            className=""
-                            mode="bezeled"
+                            className={limitOfParticipantsExceeded ? 'red-button' : ''}
+                            mode="plain"
                             size="s"
-                            disabled={isLoading || limitOfParticipantsExceeded || updateParticipationCount}
+                            disabled={isLoading || updateParticipationCount}
                             onClick={() => updateParticipantCount('add')}
                         >
-                            ➕
+                            {limitOfParticipantsExceeded ? '➕(🕒только резерв)' : '➕'}
                         </Button>
                     </>
                 )}
@@ -289,37 +305,64 @@ export const EventDetails = () => {
 
             <List>
                 {eventDetails?.participants.map((participant, index) => (
-                    <div className="participant" key={participant.id}>
-                        {participant.userName && (
-                            <a
-                                href={"https://t.me/" + participant.userName}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                {index + 1}. {participant.firstName} {participant.lastName}
-                            </a>
-                        )}
-                        {!participant.userName && (
-                            <div>
-                                {index + 1}. {participant.firstName} {participant.lastName}
-                            </div>
-                        )}
-                        <div style={{marginLeft: 'auto'}}>Мест: {participant.participationCount}&nbsp;&nbsp;
-                            {String(currentUser?.id) === String(eventDetails.creator.telegramId) && (
-                                <span key={refreshKey}>
-        <button
-            className={participant.paid ? 'paid-button' : 'unpaid-button'}
-            disabled={isLoading}
-            onClick={() => handlerMarkParticipantAsPaid(participant.telegramId, !participant.paid)}
-        >
-            {participant.paid ? '✓' : '₽'}
-        </button>
-    </span>
-                            )}
-                        </div>
+                    <span key={refreshKey} className="parent-container ">
+<div
+    className={
+        `participant border ${
+            String(participant.telegramId) === String(currentUser?.id) ? 'highlight-participant' : ''
+        }`
+    }
+    key={participant.id}
+>
+    {/* Левый блок - информация о пользователе */}
+      <div className="participant-info">
+      {participant.userName ? (
+          <a
+              href={"https://t.me/" + participant.userName}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="participant-link"
+          >
+              {index + 1}. {participant.firstName} {participant.lastName}
+              <span className="username">
+            <br/>[{participant.userName}]
+          </span>
+          </a>
+      ) : (
+          <div className="participant-name">
+              {index + 1}. {participant.firstName} {participant.lastName}
+          </div>
+      )}
+    </div>
 
-                    </div>
-                ))}
+      {/* Правый блок - статистика и кнопка */}
+      <div className="participant-meta">
+      <div className="participant-counts">
+        {participant.mainParticipantsCount > 0 && (
+            <span className="main-count">
+                Мест: {participant.mainParticipantsCount}<br/>
+    </span>
+
+        )}
+          {participant.reserveParticipantsCount > 0 && (
+              <span className="reserve-count">
+                Резерв: {participant.reserveParticipantsCount}
+            </span>
+          )}
+      </div>
+
+          {String(currentUser?.id) === String(eventDetails.creator.telegramId) && (
+              <button
+                  className={participant.paid ? 'paid-button' : 'unpaid-button'}
+                  disabled={isLoading}
+                  onClick={() => handlerMarkParticipantAsPaid(participant.telegramId, !participant.paid)}
+              >
+                  {participant.paid ? '✓' : '₽'}
+              </button>
+          )}
+    </div>
+  </div>
+</span>))}
             </List>
         </Page>
     );

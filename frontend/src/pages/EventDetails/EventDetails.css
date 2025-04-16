@@ -1,124 +1,187 @@
+/* Общие стили */
 .list {
     background: var(--tgui--secondary_bg_color);
-
 }
 
-
 a {
-
     text-decoration: none;
     color: var(--tgui--accent_text_color);
 }
 
 a:hover {
     background-size: 100% 1px;
-
 }
 
-.creator {
-    margin: auto;
+.organizer-container {
+    padding: 12px;
+    background: var(--tgui--bg_color);
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+.organizer-label {
+    font-size: 14px;
+}
+.organizer-name {
+    font-weight: 500;
+}
+.organizer-contact {
+    margin-left: auto;
     display: flex;
     align-items: center;
-    gap:10px;
-    width: 70%;
-
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    transition: background 0.2s ease;
+}
+.organizer-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
+.telegram-icon {
+    font-size: 30px;
+}
 
+/* Кнопки */
 .button {
     margin: auto;
     display: block;
-
 }
 
+.red-button {
+    background-color: red;
+    border-color: red;
+}
 
+/* Описание события */
 .description {
     margin: auto;
     height: auto;
     display: block;
     text-align: left;
-    padding-left: 1rem;
-    padding-right: 1rem;
-
+    padding: 1rem 1rem;
 }
 
+/* Информационный блок */
 .info-container {
     display: flex;
-    gap: 20px; /* Расстояние между элементами */
-    align-items: center; /* Выравнивание по вертикали */
+    gap: 20px;
+    align-items: center;
     font-size: 1rem;
     font-weight: bold;
-    padding: 5px 5px;
+    padding: 5px;
 }
 
-
 .time, .limit {
-    white-space: nowrap; /* Запрет переноса текста */
+    white-space: nowrap;
     font-size: 1rem;
     font-weight: bold;
     margin: auto;
-    padding: 5px 5px;
+    padding: 5px;
     height: auto;
     display: block;
     text-align: left;
-
-
 }
 
 .time {
-
     cursor: pointer;
 }
 
+/* Секция деталей */
+.section-details {
+    color: var(--tg-theme-link-color, blue);
+    text-align: center;
+    border-radius: 10px;
+    background: var(--tgui--section_bg_color);
+    margin: 5px 2px;
+    padding: 4px;
+}
+
+/* Стили для участников */
+.parent-container {
+    display: block;
+    width: 100%;
+}
 
 .participant {
-
-    height: auto;
     display: flex;
-    padding: 4px;
-    margin: 4px;
-
-
-    border-left: 1px solid rgba(255, 133, 34, 0.20);
-    border-right: 1px solid rgba(255, 133, 34, 0.20);
+    background: var(--tgui--section_bg_color);
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    margin: 1rem  2px;
+    height: auto;
     border-radius: 5px;
+    transition: all 0.2s ease;
+}
+.highlight-participant {
 
+    border: 2px solid rgba(255, 133, 34, 0.76);
 }
 
 .participant:hover {
     background: linear-gradient(90deg, rgba(255, 126, 95, 0.03), rgba(254, 180, 123, 0.05));
-    padding: 4px;
-    margin: 4px;
-
-    /*border: 1px solid rgba(255, 133, 34, 0.20);*/
-    border-radius: 5px;
 }
 
-.section-details {
-    color: var(--tg-theme-link-color, blue);
-    text-align: center;
-
-    border-radius: 10px;
-    background: var(--tgui--section_bg_color);
-    margin: 5px 2px;
-    padding: 2px;
-
+.participant-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
-.paid-button{
+
+.participant-link, .participant-name {
+    display: inline-block;
+    text-decoration: none;
+    /*line-height: 1.4;*/
+}
+
+.username {
+    font-size: 10px;
+    margin-left: 1rem;
+    display: block;
+}
+
+.participant-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.participant-counts {
+    font-size: 14px;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* Кнопки оплаты */
+.paid-button, .unpaid-button {
+    min-width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.paid-button {
     background-color: rgba(0, 128, 0, 0.54);
     color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
 }
 
 .unpaid-button {
     background-color: rgba(255, 0, 0, 0.55);
-    color: rgb(255, 255, 255);
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
+    color: white;
 }
 
+.paid-button:hover, .unpaid-button:hover {
+    opacity: 0.9;
+}
+.reserve-count {
+    color: red;
+}

@@ -8,7 +8,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/@prisma/client" // Adjust this path as needed
+  output   = "../node_modules/.prisma/client" // Adjust this path as needed
 }
 
 datasource db {
@@ -47,13 +47,15 @@ model Event {
 
 // Таблица для связи многие-ко-многим между User и Event
 model UserEvent {
-  userId  Int
-  user    User    @relation(fields: [userId], references: [id])
-  eventId Int
-  event   Event   @relation(fields: [eventId], references: [id])
-  count   Int     @default(1) // Количество участий
-  paid    Boolean @default(false) // Поле для отслеживания оплаты
-  amount  Float   @default(0) // Сумма, оплаченная участником
+  userId                   Int
+  user                     User     @relation(fields: [userId], references: [id])
+  eventId                  Int
+  event                    Event    @relation(fields: [eventId], references: [id])
+  paid                     Boolean  @default(false) // Поле для отслеживания оплаты
+  amount                   Float    @default(0) // Сумма, оплаченная участником
+  mainParticipantsCount    Int      @default(0) // Количество основных участников
+  reserveParticipantsCount Int      @default(0) // Количество резервных участников
+  createdAt                DateTime @default(now()) // <- вот это
 
   @@id([userId, eventId]) // Составной первичный ключ
 }

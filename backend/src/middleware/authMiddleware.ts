@@ -50,7 +50,6 @@ const authMiddleware: RequestHandler = (req, res, next) => {
                 });
                 // Parse init data. We will surely need it in the future.
                 setInitData(res, parse(authData));
-                console.log(getInitData(res))
                 next();
             } catch (e) {
                 next(e);

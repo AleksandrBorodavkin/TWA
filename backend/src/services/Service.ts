@@ -177,7 +177,11 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
         throw new Error('Event not found');
     }
 
-    const totalParticipantsCount = event.UserEvent.reduce((sum, userEvent) => sum + userEvent.count, 0);
+    const totalParticipantsCount = event.UserEvent.reduce(
+        (sum, userEvent) => sum + userEvent.mainParticipantsCount + userEvent.reserveParticipantsCount,
+        0
+    );
+
     return {
         id: event?.id,
         title: event?.title,
@@ -185,8 +189,8 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
         limit: event?.limit,
         status: event?.status,
         description: event?.description,
-        date: event?.date, // Преобразуем дату в строку
-        totalParticipantsCount: totalParticipantsCount, // Количество участников
+        date: event?.date,
+        totalParticipantsCount: totalParticipantsCount,
         participants: event?.UserEvent.map(userEvent => ({
             id: userEvent.user.id,
             paid: userEvent.paid,
@@ -196,9 +200,11 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
             lastName: userEvent.user.lastName,
             userName: userEvent.user.userName,
             languageCode: userEvent.user.languageCode,
-            participationCount: userEvent.count,
+            mainParticipantsCount: userEvent.mainParticipantsCount,
+            reserveParticipantsCount: userEvent.reserveParticipantsCount,
         })),
-    }
+    };
+
 }
 
 export const findOrCreateUser = async (currentUser: any) => {
@@ -224,196 +230,255 @@ export const findOrCreateUser = async (currentUser: any) => {
     });
 };
 
-export const addUserToEventService = async (req: Request, res: Response) => {
-    const currentUser = getInitData(res).user
-    const {eventId} = req.params;
-
-    // Проверяем, существует ли событие
-    const event = await prisma.event.findUnique({
-        where: {id: parseInt(eventId)},
-    });
-
-    // Получаем данные о событии
-    const eventDetails = await getEventByIdWithUsersService(eventId.toString());
-
-    // Проверяем, не превышен ли лимит
-    if (eventDetails.totalParticipantsCount >= eventDetails.limit) {
-        throw new Error('Лимит участников достигнут. Невозможно добавить нового участника.');
-    }
-
-    if (!event) {
-        return res.status(404).json({error: 'Event not found'});
-    }
-
-    // Ищем пользователя по telegramId
-    let user = await prisma.user.findUnique({
-        where: {telegramId: String(currentUser.id)},
-    });
-
-    // Если пользователь не найден, создаем нового
-    if (!user) {
-        user = await prisma.user.create({
-            data: {
-                telegramId: String(currentUser.id),
-                allowsWriteToPm: currentUser.allows_write_to_pm,
-                userName: currentUser.username,
-                firstName: currentUser.first_name,
-                lastName: currentUser.last_name,
-                languageCode: currentUser.language_code,
-            },
-        });
-    }
-
-    const existingParticipation = await prisma.userEvent.findUnique({
-        where: {
-            userId_eventId: {
-                userId: user.id,
-                eventId: event.id,
-            },
-        },
-    });
-
-    let newParticipation;
-    if (existingParticipation) {
-        // Если пользователь уже участвует, увеличиваем счетчик
-        newParticipation = await prisma.userEvent.update({
-            where: {
-                userId_eventId: {
-                    userId: user.id,
-                    eventId: event.id,
-                },
-            },
-            data: {
-                count: existingParticipation.count + 1,
-            },
-        });
-    } else {
-        // Если пользователь не участвует, создаем новую запись
-        newParticipation = await prisma.userEvent.create({
-            data: {
-                userId: user.id,
-                eventId: event.id,
-                count: 1,
-            },
-        });
-    }
-
-    return {newParticipant: newParticipation, newEvent: event, message: 'User added to event'};
-
-};
-
-// export const deleteUserFromEventService = async (eventId: number, telegramId: string) => {
-//     // Найти мероприятие по ID
+// export const addUserToEventService = async (req: Request, res: Response) => {
+//     const currentUser = getInitData(res).user;
+//     const { eventId } = req.params;
+//
 //     const event = await prisma.event.findUnique({
-//         where: {id: eventId}
+//         where: { id: parseInt(eventId) },
 //     });
+//
 //     if (!event) {
-//         throw new Error('Event not found');
+//         return res.status(404).json({ error: 'Event not found' });
 //     }
 //
-//     // Найти пользователя по telegramId
-//     const user = await prisma.user.findUnique({
-//         where: {telegramId: String(telegramId)}
+//     // Получаем текущее количество всех участников
+//     const eventDetails = await getEventByIdWithUsersService(eventId.toString());
+//     const isReserve = eventDetails.totalParticipantsCount >= eventDetails.limit;
+//
+//     // Ищем пользователя по telegramId
+//     let user = await prisma.user.findUnique({
+//         where: { telegramId: String(currentUser.id) },
 //     });
+//
 //     if (!user) {
-//         throw new Error('User not found');
+//         user = await prisma.user.create({
+//             data: {
+//                 telegramId: String(currentUser.id),
+//                 allowsWriteToPm: currentUser.allows_write_to_pm,
+//                 userName: currentUser.username,
+//                 firstName: currentUser.first_name,
+//                 lastName: currentUser.last_name,
+//                 languageCode: currentUser.language_code,
+//             },
+//         });
 //     }
 //
-//     // Проверить, состоит ли пользователь в мероприятии
-//     const userEvent = await prisma.userEvent.findUnique({
+//     const existingParticipation = await prisma.userEvent.findUnique({
 //         where: {
 //             userId_eventId: {
 //                 userId: user.id,
-//                 eventId: event.id
-//             }
-//         }
+//                 eventId: event.id,
+//             },
+//         },
 //     });
-//     if (!userEvent) {
-//         throw new Error('User is not a participant of this event');
+//
+//     let newParticipation;
+//
+//     if (existingParticipation) {
+//         // Обновляем существующую запись
+//         newParticipation = await prisma.userEvent.update({
+//             where: {
+//                 userId_eventId: {
+//                     userId: user.id,
+//                     eventId: event.id,
+//                 },
+//             },
+//             data: isReserve
+//                 ? { reserveParticipantsCount: { increment: 1 } }
+//                 : { mainParticipantsCount: { increment: 1 } },
+//         });
+//     } else {
+//         // Создаём новую запись
+//         newParticipation = await prisma.userEvent.create({
+//             data: {
+//                 userId: user.id,
+//                 eventId: event.id,
+//                 mainParticipantsCount: isReserve ? 0 : 1,
+//                 reserveParticipantsCount: isReserve ? 1 : 0,
+//             },
+//         });
+//     }
+//     // Получаем создателя события
+//     const creator = await prisma.user.findUnique({
+//         where: { id: event.creatorId },
+//     });
+//     if (creator?.telegramId) {
+//         const role = isReserve ? "в резервный список" : "в основной список";
+//         const total = eventDetails.totalParticipantsCount + 1;
+//         await sendTelegramNotification(
+//             creator.telegramId,
+//             `➕ ${user.firstName || 'Пользователь'} (${user.userName ? '@' + user.userName : 'без username'}) присоединился ${role} события «${event.title}».\n` +
+//             `👥 Всего участников: ${total}/${event.limit}`
+//         );
 //     }
 //
-//     // Удалить пользователя из мероприятия
-//     await prisma.userEvent.delete({
-//         where: {
-//             userId_eventId: {
-//                 userId: user.id,
-//                 eventId: event.id
-//             }
-//         }
-//     });
 //
-//     // return {success: true, message: 'User deleted from event'};
-//     return {newParticipant: newParticipation, newEvent: event, message: 'User added to event'};
+//
+//     return {
+//         newParticipant: newParticipation,
+//         newEvent: event,
+//         isReserve,
+//         message: isReserve
+//             ? 'Пользователь добавлен в резерв участников'
+//             : 'Пользователь добавлен в список основных участников',
+//     };
 // };
+//
 
-export const decreaseParticipantsService = async (telegramId: string, eventId: number) => {
-    // Проверяем, существует ли событие
-    const event = await prisma.event.findUnique({
-        where: { id: eventId },
-        include: { UserEvent: true },
-    });
 
-    if (!event) {
-        throw new Error("Event not found");
-    }
 
-    // Ищем пользователя по telegramId
-    const user = await prisma.user.findUnique({
-        where: { telegramId },
-    });
 
-    if (!user) {
-        throw new Error("User not found");
-    }
+// export const decreaseParticipantsService = async (telegramId: string, eventId: number) => {
+//     const event = await prisma.event.findUnique({
+//         where: { id: eventId },
+//         include: {
+//             UserEvent: {
+//                 include: { user: true }, // Нужно для уведомлений
+//             },
+//         },
+//     });
+//
+//     if (!event) throw new Error("Event not found");
+//
+//     const user = await prisma.user.findUnique({
+//         where: { telegramId },
+//     });
+//
+//     if (!user) throw new Error("User not found");
+//
+//     const participation = await prisma.userEvent.findUnique({
+//         where: {
+//             userId_eventId: {
+//                 userId: user.id,
+//                 eventId,
+//             },
+//         },
+//     });
+//
+//     if (!participation) throw new Error("User is not participating in this event");
+//
+//     let updatedParticipation = null;
+//
+//     if (participation.mainParticipantsCount > 1) {
+//         updatedParticipation = await prisma.userEvent.update({
+//             where: {
+//                 userId_eventId: {
+//                     userId: user.id,
+//                     eventId,
+//                 },
+//             },
+//             data: {
+//                 mainParticipantsCount: { decrement: 1 },
+//             },
+//         });
+//     } else if (participation.mainParticipantsCount === 1 && participation.reserveParticipantsCount === 0) {
+//         await prisma.userEvent.delete({
+//             where: {
+//                 userId_eventId: {
+//                     userId: user.id,
+//                     eventId,
+//                 },
+//             },
+//         });
+//     } else {
+//         // Если резерв есть, но основных нет — просто уменьшаем резерв
+//         await prisma.userEvent.update({
+//             where: {
+//                 userId_eventId: {
+//                     userId: user.id,
+//                     eventId,
+//                 },
+//             },
+//             data: {
+//                 reserveParticipantsCount: { decrement: 1 },
+//             },
+//         });
+//     }
+//
+//     // Перезапрашиваем событие
+//     const updatedEvent = await prisma.event.findUnique({
+//         where: { id: eventId },
+//         include: {
+//             UserEvent: {
+//                 include: { user: true },
+//             },
+//         },
+//     });
+//
+//     if (!updatedEvent) throw new Error("Failed to reload event");
+//
+//     const totalMain = updatedEvent.UserEvent.reduce((sum, ue) => sum + ue.mainParticipantsCount, 0);
+//
+//     if (totalMain < updatedEvent.limit) {
+//         const reserveToPromote = updatedEvent.UserEvent.find(ue => ue.reserveParticipantsCount > 0);
+//
+//         if (reserveToPromote) {
+//             await prisma.userEvent.update({
+//                 where: {
+//                     userId_eventId: {
+//                         userId: reserveToPromote.userId,
+//                         eventId,
+//                     },
+//                 },
+//                 data: {
+//                     reserveParticipantsCount: { decrement: 1 },
+//                     mainParticipantsCount: { increment: 1 },
+//                 },
+//             });
+//
+//             // Уведомляем участника
+//             await sendTelegramNotification(
+//                 reserveToPromote.user.telegramId,
+//                 `🎉 Освободилось место на мероприятии «${updatedEvent.title}»!\n` +
+//                 `✅ Вы переведены в основной список участников.\n` +
+//                 `📅 Дата: ${new Date(updatedEvent.date).toLocaleString('ru-RU')}\n` +
+//                 `👤 Ваш ник: ${reserveToPromote.user.firstName || 'Пользователь'}${reserveToPromote.user.userName ? ' (@' + reserveToPromote.user.userName + ')' : ''}`
+//             );
+//
+//             // Уведомляем создателя
+//             const creator = await prisma.user.findUnique({
+//                 where: {
+//                     id: updatedEvent.creatorId,
+//                 },
+//             });
+//
+//             if (creator?.telegramId) {
+//                 await sendTelegramNotification(
+//                     creator.telegramId,
+//                     `ℹ️ Участник из резерва перемещён в основной список события «${updatedEvent.title}».\n` +
+//                     `👤 ${reserveToPromote.user.firstName || 'Пользователь'}${reserveToPromote.user.userName ? ' (@' + reserveToPromote.user.userName + ')' : ''}`
+//                 );
+//             }
+//         }
+//     }
+//
+//
+//     const finalEvent = await prisma.event.findUnique({
+//         where: { id: eventId },
+//         include: { UserEvent: true },
+//     });
+//     const creator = await prisma.user.findUnique({
+//         where: { id: event.creatorId },
+//     });
+//
+//     if (creator?.telegramId) {
+//         const totalMain = finalEvent?.UserEvent.reduce((sum, ue) => sum + ue.mainParticipantsCount, 0) || 0;
+//         const totalReserve = finalEvent?.UserEvent.reduce((sum, ue) => sum + ue.reserveParticipantsCount, 0) || 0;
+//         await sendTelegramNotification(
+//             creator.telegramId,
+//             `➖ ${user.firstName || 'Пользователь'} (${user.userName ? '@' + user.userName : 'без username'}) покинул событие «${event.title}».\n` +
+//             `👤 Основных участников: ${totalMain}/${event.limit}\n` +
+//             `⏳ В резерве: ${totalReserve}`
+//         );
+//     }
+//     return {
+//         updatedParticipant: updatedParticipation,
+//         updatedEvent: finalEvent,
+//         message: "User participation decreased successfully",
+//     };
+// };
+//
 
-    // Проверяем участие пользователя в событии
-    const participation = await prisma.userEvent.findUnique({
-        where: {
-            userId_eventId: {
-                userId: user.id,
-                eventId,
-            },
-        },
-    });
-
-    if (!participation) {
-        throw new Error("User is not participating in this event");
-    }
-
-    let updatedParticipation = null;
-
-    if (participation.count > 1) {
-        // Уменьшаем количество участий
-        updatedParticipation = await prisma.userEvent.update({
-            where: {
-                userId_eventId: {
-                    userId: user.id,
-                    eventId,
-                },
-            },
-            data: {
-                count: participation.count - 1,
-            },
-        });
-    } else {
-        // Если count = 1, удаляем запись
-        await prisma.userEvent.delete({
-            where: {
-                userId_eventId: {
-                    userId: user.id,
-                    eventId,
-                },
-            },
-        });
-    }
-
-    // Получаем обновленное количество участников
-    const updatedEvent = await prisma.event.findUnique({
-        where: { id: eventId },
-        include: { UserEvent: true },
-    });
-
-    return { updatedParticipant: updatedParticipation, updatedEvent, message: "User participation decreased successfully" };
-};
 
 
