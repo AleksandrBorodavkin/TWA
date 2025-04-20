@@ -1,16 +1,17 @@
 import {Request, Response} from 'express';
 import {
-    createEventService,
     getEventByIdWithUsersService,
     getEventsByUserTelegramIdService,
-    changeStatusEventService,
+    decreaseParticipantsService,
+    createEventService,
     markParticipantAsPaidService,
-} from "../services/Service";
+    changeStatusEventService,
+    addUserToEventService,
+} from "../services";
 import {IEvent} from "../interfaces/IEvent";
 import {getInitData} from "../middleware/authMiddleware";
 import axios from "axios";
-import {decreaseParticipantsService} from "../services/decreaseParticipantsService";
-import {addUserToEventService} from "../services/addUserToEventService";
+import {updateEventService} from "../services/updateEventService";
 
 
 export const markParticipantAsPaidController = async (req: Request, res: Response) => {
@@ -114,23 +115,86 @@ export const decreaseParticipantsController = async (req: Request, res: Response
     }
 };
 
+export const updateEventController= async (req: Request, res: Response) => {
+    try {
+        const currentUserTelegramId = getInitData(res).user.id;
+        const eventId = Number(req.params.eventId);
+        const updatedData = req.body;
+
+        const result = await updateEventService(eventId, updatedData, currentUserTelegramId);
+        res.json(result);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
 export const checkMembership = async (req: Request, res: Response) => {
     try {
         const userId = getInitData(res).user?.id;
         if (!userId) throw new Error('User ID not found in init data');
 
-        // Проверка членства в чате
-        const response = await axios.get(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/getChatMember`, {
-            params: {
-                chat_id: process.env.CHAT_ID,
-                user_id: userId,
-            },
+        // Массив чатов для проверки
+        const chatIds = [
+            process.env.CHAT_ID_1,
+            process.env.CHAT_ID_2,
+            process.env.CHAT_ID_3
+        ].filter(Boolean);
+
+        if (chatIds.length === 0) {
+            throw new Error('No chat IDs configured for membership check');
+        }
+
+        const membershipChecks = chatIds.map(async (chatId) => {
+            try {
+                const response = await axios.get(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/getChatMember`, {
+                    params: {
+                        chat_id: chatId,
+                        user_id: userId,
+                    },
+                });
+                return {
+                    chatId,
+                    status: response.data.result?.status,
+                };
+            } catch (error) {
+                console.error(`Error checking membership for chat ${chatId}:`, error);
+
+                // Правильная обработка ошибки с проверкой типа
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+                return {
+                    chatId,
+                    status: 'error',
+                    error: errorMessage
+                };
+            }
         });
 
-        const {status} = response.data.result;
-        res.json({userStatus: status});
-    } catch (error) {
+        const results = await Promise.all(membershipChecks);
 
-        res.status(500).json({error: 'Failed to check user status in group'});
+        // Проверяем все значимые статусы
+        const isMember = results.some(result =>
+            ['creator', 'administrator', 'member', 'restricted'].includes(result.status)
+        );
+
+        // Дополнительная информация о правах
+        const isAdmin = results.some(result =>
+            ['creator', 'administrator'].includes(result.status)
+        );
+
+        res.json({
+            isMember,  // true если creator/administrator/member/restricted
+            isAdmin,   // true если creator/administrator
+            memberships: results,
+        });
+
+
+    } catch (error) {
+        console.error('Failed to check user status in groups:', error);
+
+        // Обработка ошибки в основном блоке catch
+        const errorMessage = error instanceof Error ? error.message : 'Failed to check user status in groups';
+
+        res.status(500).json({error: errorMessage});
     }
 };

@@ -10,7 +10,7 @@ import {IEvent} from "@/types/eventTypes.ts";
 
 export const EventsList = () => {
     const [events, setEvents] = useState<IEvent[]>([]);
-    const {createFormEventStatus, userStatus} = useStore();
+    const {createFormEventShow, userIsMember} = useStore();
     const [showCreateEventPage, setShowCreateEventPage] = useState(false);
 
     const handleButtonClick = () => {
@@ -24,7 +24,7 @@ export const EventsList = () => {
             .then(events => setEvents(events.filter(event => event.status)))
             .catch(error => console.error('Error in getEvents', error));
 
-    }, [createFormEventStatus]);
+    }, [createFormEventShow]);
     return (
         <div>
             <div className={'section_event_list'}>
@@ -51,7 +51,7 @@ export const EventsList = () => {
             </div>
             <div className={'section'}>
                 <div>
-                    {userStatus === 'member' || userStatus === 'administrator' || userStatus === 'creator' ? (
+                    {userIsMember ? (
                         <>
                             <button className={'button_show_hide_create_event'} onClick={handleButtonClick}
                             >

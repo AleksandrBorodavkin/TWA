@@ -13,26 +13,25 @@ export function App() {
   const isDark = useSignal(miniApp.isDark);
 
 
-  const {userStatus, updateUserStatus} = useStore();
+  const {userIsMember, updateUserIsMember} = useStore();
 
   useEffect(() => {
     const checkUserMembership = async () => {
       try {
-        const user = await checkMembership();
+        const {isMember} = await checkMembership();
         // const isMember = user.userStatus === 'member' || user.userStatus === 'administrator' || user.userStatus === 'creator';
-
-        updateUserStatus(user.userStatus);
+        updateUserIsMember(isMember);
 
       } catch (error) {
         console.error('Error checking membership:', error);
-        // miniApp.close();
+        miniApp.close();
       }
     };
 
-    if (userStatus === null) {
+    if (userIsMember === null) {
       checkUserMembership()
     }
-  }, [userStatus,updateUserStatus]);
+  }, [userIsMember,updateUserIsMember]);
 
   return (
     <AppRoot
@@ -40,13 +39,11 @@ export function App() {
       platform={['macos', 'ios'].includes(lp.platform) ? 'ios' : 'base'}
     >
 
-      {userStatus === null ? (
+      {userIsMember === null ? (
               <div className={'parent-spinner'}>
                 <Spinner size="l"/>{' '}</div>
           ) :
-          userStatus === 'member'||
-          userStatus === 'administrator' ||
-          userStatus === 'creator'
+          userIsMember
               ? (
 
                   <HashRouter>

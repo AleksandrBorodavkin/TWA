@@ -2,19 +2,21 @@ import {create} from "zustand";
 
 // Тип состояния
 interface StoreState {
-    createFormEventStatus: string;
-    updateCreateFormEventStatus: (newData: string) => void;
-    userStatus: string | null;
-    updateUserStatus: (newData: string) => void;
+    createFormEventShow: string;
+    updateCreateFormEventShow: (newData: string) => void;
+
+    userIsMember: boolean | null;
+    updateUserIsMember: (newData: boolean) => void;
 }
 
 
 // Создаем хранилище с типизацией
 const useStore = create<StoreState>((set) => ({
-    createFormEventStatus: '',
-    updateCreateFormEventStatus: (newData) => set({createFormEventStatus: newData}),
-    userStatus: null,
-    updateUserStatus: (newData) => set({userStatus: newData}),
+    createFormEventShow: '',
+    updateCreateFormEventShow: (newData) => set({createFormEventShow: newData}),
+
+    userIsMember: null,
+    updateUserIsMember: (newData) => set({userIsMember: newData}),
 }));
 
 

@@ -2,7 +2,7 @@ import {Page} from '@/components/Page';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {initData} from "@telegram-apps/sdk-react";
-import {Button, List, Spinner} from "@telegram-apps/telegram-ui";
+import {Button, Input, List, Spinner} from "@telegram-apps/telegram-ui";
 import './EventDetails.css';
 import {getEventDetail} from "@/api/getEventDetails.ts";
 import {addUserToEvent} from "@/api/eventParticipants.ts";
@@ -11,6 +11,8 @@ import {generateIcsFile} from '@/utils/generateIcsFile';
 import {IEvent} from "@/types/eventTypes.ts";
 import {handlerChangeStatusEvent} from "@/api/changeEventStatus.ts";
 import {markParticipantAsPaid} from "@/api/markParticipantAsPaid.ts";
+import {updateEventField} from "@/api/updateEventField.ts";
+import {DateTime} from 'luxon';
 
 export const EventDetails = () => {
     const [eventDetails, setEventDetails] = useState<IEvent | null>(null);
@@ -24,6 +26,19 @@ export const EventDetails = () => {
     const [updateParticipationCount, setUpdateParticipationCount] = useState(false)
     const [checkBoxStatus, setCheckBoxStatus] = useState(false)
     const [refreshKey, setRefreshKey] = useState(0);
+
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [editableTitle, setEditableTitle] = useState('');
+
+    const [isEditingLimit, setIsEditingLimit] = useState(false);
+    const [editableLimit, setEditableLimit] = useState('');
+
+    const [isEditingDate, setIsEditingDate] = useState(false);
+    const [editableDate, setEditableDate] = useState();
+
+
+    const [isEditingDescription, setIsEditingDescription] = useState(false);
+    const [editableDescription, setEditableDescription] = useState('');
 
     useEffect(() => {
         if (eventId) {
@@ -52,6 +67,14 @@ export const EventDetails = () => {
 
     useEffect(() => {
         if (eventDetails) {
+            setEditableTitle(eventDetails.title);
+            const local = DateTime.fromISO(eventDetails.date, {zone: 'Asia/Bangkok'});
+            setEditableDate(local.toFormat("yyyy-MM-dd'T'HH:mm"));
+
+            setEditableLimit(eventDetails.limit)
+
+            setEditableDescription(eventDetails.description);
+
             const userExists = eventDetails.participants.some(
                 user => Number(user.telegramId) === Number(currentUser?.id)
             );
@@ -72,6 +95,51 @@ export const EventDetails = () => {
             }
         }
     }, [eventDetails, buttonParticipantCount, checkBoxStatus]);
+
+    const saveTitleChange = async () => {
+        try {
+            // вызов API на обновление
+            await updateEventField(eventDetails.id, {title: editableTitle});
+            setIsEditingTitle(false);
+            await refreshEventDetails(); // перезагрузка данных
+        } catch (e) {
+            console.error('Ошибка при сохранении заголовка:', e);
+        }
+    };
+    const saveDateChange = async () => {
+        try {
+            const local = DateTime.fromFormat(editableDate, "yyyy-MM-dd'T'HH:mm", {zone: 'Asia/Bangkok'});
+            const utc = local.toUTC();
+            await updateEventField(eventDetails.id, {date: utc.toISO()});
+            setIsEditingDate(false);
+            await refreshEventDetails();
+        } catch (e) {
+            console.error('Ошибка при сохранении даты:', e);
+        }
+    };
+
+
+    const saveLimitChange = async () => {
+        try {
+            // вызов API на обновление
+            await updateEventField(eventDetails.id, {limit: editableLimit});
+            setIsEditingLimit(false);
+            await refreshEventDetails(); // перезагрузка данных
+        } catch (e) {
+            console.error('Ошибка при сохранении описания:', e);
+        }
+    };
+
+    const saveDescriptionChange = async () => {
+        try {
+            // вызов API на обновление
+            await updateEventField(eventDetails.id, {description: editableDescription});
+            setIsEditingDescription(false);
+            await refreshEventDetails(); // перезагрузка данных
+        } catch (e) {
+            console.error('Ошибка при сохранении описания:', e);
+        }
+    };
 
     const handleParticipation = async (action: 'add' | 'remove') => {
         if (!eventId || !currentUser) return;
@@ -128,11 +196,11 @@ export const EventDetails = () => {
     };
 
 
-    const handleExportIcs = () => {
-        if (eventDetails) {
-            generateIcsFile(eventDetails);
-        }
-    };
+    // const handleExportIcs = () => {
+    //     if (eventDetails) {
+    //         generateIcsFile(eventDetails);
+    //     }
+    // };
     const handlerStatusChange = async () => {
         setIsLoading(true);
         if (!eventDetails) {
@@ -202,8 +270,33 @@ export const EventDetails = () => {
             <div className={'section-details'}>
                 <div>
                     <div className={'header border'}>
-                        {`${eventDetails?.title}`}
+                        {isEditingTitle ? (
+                            <>
+                                <input className="editable-input"
+                                       value={editableTitle}
+                                       onChange={(e) => setEditableTitle(e.target.value)}
+                                />
+                                <Button
+                                    mode="plain"
+                                    className="save-button"
+                                    onClick={saveTitleChange}>✅Сохранить</Button>
+                            </>
+                        ) : (
+                            <>
+                                {editableTitle}
+
+                                {String(currentUser?.id) === eventDetails.creator.telegramId && (
+                                    <>
+                                        <Button
+                                            mode="plain"
+                                            className="edit-button"
+                                            onClick={() => setIsEditingTitle(true)}>✏️</Button>
+                                    </>
+                                )}
+                            </>
+                        )}
                     </div>
+
                     <div>
 
                         {String(currentUser?.id) === eventDetails.creator.telegramId && (
@@ -242,26 +335,123 @@ export const EventDetails = () => {
                     </div>
                 </div>
                 <div className="info-container border">
-                    {/* Кнопка для экспорта .ics */}
-                    <div className={"time"} onClick={handleExportIcs}>
-                        📅 {`${date.getUTCDate()} ${date.toLocaleString("ru-RU", {
-                        month: "long",
-                        timeZone: "UTC"
-                    })} ${date.getUTCFullYear()}`}
-                        <br/>
-                        ⏰ {`${date.getUTCHours()}:${String(date.getUTCMinutes()).padStart(2, "0")}`}
+
+                    <div className="time ">
+                        {isEditingDate ? (
+                            <>
+                                <input className="editable-input"
+                                       type="datetime-local"
+                                       value={editableDate}
+                                       onChange={(e) => setEditableDate(e.target.value)}
+                                />
+
+
+                                <Button
+                                    mode="plain"
+                                    className="save-button"
+                                    onClick={saveDateChange}>✅
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                📅 {date.toLocaleDateString("ru-RU", {
+                                timeZone: "Asia/Bangkok",
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric"
+                            })}
+                                <br/>
+                                ⏰ {date.toLocaleTimeString("ru-RU", {
+                                timeZone: "Asia/Bangkok",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            })}
+                                <>
+
+                                    {String(currentUser?.id) === eventDetails.creator.telegramId && (
+                                        <>
+                                            <Button
+                                                mode="plain"
+                                                className="edit-button"
+                                                onClick={() => setIsEditingDate(true)}>✏️
+                                            </Button>
+                                        </>
+                                    )}
+                                </>
+                            </>
+
+                        )}
                     </div>
                     <div className="limit">
                         Мест занято: {
                         eventDetails.participants.reduce((sum, p) => sum + p.mainParticipantsCount, 0)
-                    } / {eventDetails.limit} <br/>
+                    } / {isEditingLimit ? (
+                        <>
+                            <input className="editable-input editable-input-limit"
+                                   type='number'
+
+                                   value={editableLimit}
+                                   onChange={(e) => setEditableLimit(e.target.value)}
+                            />
+                            <Button
+                                mode="plain"
+                                className="save-button"
+                                onClick={saveLimitChange}>✅Сохранить</Button>
+                        </>
+                    ) : (
+                        <>
+                            {editableLimit}
+                            {String(currentUser?.id) === eventDetails.creator.telegramId && (
+                                <>
+                                    <Button
+                                        disabled={true}
+                                        mode="plain"
+                                        className="edit-button"
+                                        onClick={() => setIsEditingLimit(true)}>✏️
+                                    </Button>
+                                </>
+                            )}
+
+                        </>
+                    )} <br/>
                         В резерве: {
                         eventDetails.participants.reduce((sum, p) => sum + p.reserveParticipantsCount, 0)
                     }
                     </div>
 
+
                 </div>
-                <div className={"description border"}> {eventDetails?.description}</div>
+                <div className={"description border"}>
+                    {isEditingDescription ? (
+                        <>
+                            <input className="editable-input"
+                                   value={editableDescription}
+                                   onChange={(e) => setEditableDescription(e.target.value)}
+                            />
+                            <Button
+                                mode="plain"
+                                className="save-button"
+                                onClick={saveDescriptionChange}>✅Сохранить</Button>
+                        </>
+                    ) : (
+                        <>
+                            {editableDescription}
+                            <>
+
+                                {String(currentUser?.id) === eventDetails.creator.telegramId && (
+                                    <>
+                                        <Button
+                                            mode="plain"
+                                            className="edit-button"
+                                            onClick={() => setIsEditingDescription(true)}>✏️
+                                        </Button>
+                                    </>
+                                )}
+                            </>
+
+                        </>
+                    )}
+                </div>
             </div>
 
             <div className="centre">
@@ -305,17 +495,16 @@ export const EventDetails = () => {
 
             <List>
                 {eventDetails?.participants.map((participant, index) => (
-                    <span key={refreshKey} className="parent-container ">
+                    <span key={participant.telegramId} className="parent-container">
 <div
     className={
         `participant border ${
             String(participant.telegramId) === String(currentUser?.id) ? 'highlight-participant' : ''
         }`
     }
-    key={participant.id}
 >
     {/* Левый блок - информация о пользователе */}
-      <div className="participant-info">
+    <div className="participant-info">
       {participant.userName ? (
           <a
               href={"https://t.me/" + participant.userName}
@@ -335,8 +524,8 @@ export const EventDetails = () => {
       )}
     </div>
 
-      {/* Правый блок - статистика и кнопка */}
-      <div className="participant-meta">
+    {/* Правый блок - статистика и кнопка */}
+    <div className="participant-meta">
       <div className="participant-counts">
         {participant.mainParticipantsCount > 0 && (
             <span className="main-count">
@@ -351,15 +540,15 @@ export const EventDetails = () => {
           )}
       </div>
 
-          {String(currentUser?.id) === String(eventDetails.creator.telegramId) && (
-              <button
-                  className={participant.paid ? 'paid-button' : 'unpaid-button'}
-                  disabled={isLoading}
-                  onClick={() => handlerMarkParticipantAsPaid(participant.telegramId, !participant.paid)}
-              >
-                  {participant.paid ? '✓' : '₽'}
-              </button>
-          )}
+        {String(currentUser?.id) === String(eventDetails.creator.telegramId) && (
+            <button
+                className={participant.paid ? 'paid-button' : 'unpaid-button'}
+                disabled={isLoading}
+                onClick={() => handlerMarkParticipantAsPaid(participant.telegramId, !participant.paid)}
+            >
+                {participant.paid ? '✓' : '₽'}
+            </button>
+        )}
     </div>
   </div>
 </span>))}

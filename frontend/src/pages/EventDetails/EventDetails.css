@@ -25,7 +25,6 @@ a:hover {
     font-weight: 500;
 }
 .organizer-contact {
-    margin-left: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -38,6 +37,7 @@ a:hover {
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .telegram-icon {
@@ -60,7 +60,6 @@ a:hover {
     margin: auto;
     height: auto;
     display: block;
-    text-align: left;
     padding: 1rem 1rem;
 }
 
@@ -91,7 +90,7 @@ a:hover {
 
 /* Секция деталей */
 .section-details {
-    color: var(--tg-theme-link-color, blue);
+    color: var(--tgui--link_color, blue);
     text-align: center;
     border-radius: 10px;
     background: var(--tgui--section_bg_color);
@@ -184,4 +183,36 @@ a:hover {
 }
 .reserve-count {
     color: red;
+}
+
+.editable-input {
+    background: var(--tgui--secondary_bg_color);
+    color: var(--tgui--accent_text_color);
+    -webkit-text-fill-color: var(--tgui--accent_text_color) !important;
+
+    font-size: 1rem;
+    padding: 8px 12px;
+    border: 1px solid var(--tgui--bg_color);
+    border-radius: 8px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.editable-input-limit{
+    width: 17%;
+}
+
+
+
+.editable-input:focus {
+    border-color: var(--tgui--accent_text_color);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+
+.save-button, .edit-button {
+
+    -webkit-text-fill-color: initial !important;
 }

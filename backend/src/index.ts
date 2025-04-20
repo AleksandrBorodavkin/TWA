@@ -9,7 +9,7 @@ import {
     createEvent,
     changeStatusEventController,
     markParticipantAsPaidController,
-    decreaseParticipantsController,
+    decreaseParticipantsController, updateEventController,
 
 } from './controllers/Controller';
 
@@ -61,6 +61,7 @@ app.get('/events/:eventId/participants',getEventByIdWithUsersController)
 app.get('/events', getEventsByUserTelegramIdController);
 // app.get('/events/:id', getEventById);
 app.post('/events', createEvent);
+app.patch('/event/:eventId', updateEventController);
 // app.put('/events/:id', updateEvent);
 // app.delete('/events/:id', deleteEvent);
 //

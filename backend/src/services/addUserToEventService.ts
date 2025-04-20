@@ -1,9 +1,7 @@
 import {getInitData} from "../middleware/authMiddleware";
 import {PrismaClient} from '.prisma/client';
 import {Request, Response} from "express";
-import {IEvent} from "../interfaces/IEvent";
-import {getEventByIdWithUsersService} from "./Service";
-import {sendTelegramNotification} from "../utils/sendTelegramNotification";
+import {getEventByIdWithUsersService} from "./index";
 import {notifyCreator} from "../utils/telegramNotify";
 
 
@@ -84,19 +82,6 @@ export const addUserToEventService = async (req: Request, res: Response) => {
 
 )
 
-    // Получаем создателя события
-    // const creator = await prisma.user.findUnique({
-    //     where: { id: event.creatorId },
-    // });
-    // if (creator?.telegramId) {
-    //     const role = isReserve ? "в резервный список" : "в основной список";
-    //     const total = eventDetails.totalParticipantsCount + 1;
-    //     await sendTelegramNotification(
-    //         creator.telegramId,
-    //         `➕ ${user.firstName || 'Пользователь'} (${user.userName ? '@' + user.userName : 'без username'}) присоединился ${role} события «${event.title}».\n` +
-    //         `👥 Всего участников: ${total}/${event.limit}`
-    //     );
-    // }
 
 
 

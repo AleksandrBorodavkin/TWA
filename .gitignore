@@ -38,3 +38,5 @@ dist-frontend
 /twa-backend_old/
 /backend/prisma/migrations/
 /ecosystem.config.js
+/backend/.env
+/backend/ecosystem.config.js
