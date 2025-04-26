@@ -14,7 +14,7 @@ import {
 } from './controllers/Controller';
 
 import {authMiddleware} from "./middleware/authMiddleware";
-import {bot, setupBot} from "../bot";
+import {bot, setupBot} from "./bot";
 import {webhookCallback} from "grammy";
 import axios from "axios";
 
@@ -24,7 +24,7 @@ require("dotenv").config();
 
 setupBot();
 app.use(express.json());
-app.use("/bot", webhookCallback(bot, "express"));
+app.use(process.env.BOT_PATCH!, webhookCallback(bot, "express"));
 app.use(helmet())
 app.use(cors())
 app.use(authMiddleware)

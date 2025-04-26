@@ -18,14 +18,15 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({onSuccess}) => {
     const [description, setDescription] = useState<string>('');
     const [message, setMessage] = useState<string | null>(null);
     const {initDataRaw} = retrieveLaunchParams();
-    const {updateCreateFormEventStatus} = useStore();
+    const {updateCreateFormEventShow} = useStore();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
 
         try {
-            const data = {title, description, date, limit, status};
+            const utcDate = new Date(date).toISOString();
+            const data = {title, description, date: utcDate, limit, status};
             const response = await fetch(`${apiDomain}/events`, {
                 method: 'POST',
                 headers: {
@@ -48,7 +49,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({onSuccess}) => {
             setLimit(0);
             setStatus(true);
 
-            updateCreateFormEventStatus(title)
+            updateCreateFormEventShow(title)
 
             if (onSuccess) {
                 onSuccess();

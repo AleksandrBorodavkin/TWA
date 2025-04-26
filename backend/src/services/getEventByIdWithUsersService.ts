@@ -1,7 +1,4 @@
 import {PrismaClient} from '.prisma/client';
-import {Request, Response} from "express";
-import {getInitData} from "../middleware/authMiddleware";
-import {IEvent} from "../interfaces/IEvent";
 
 
 const prisma = new PrismaClient();
@@ -39,8 +36,9 @@ export const getEventByIdWithUsersService = async (eventId: string) => {
         date: event?.date,
         totalParticipantsCount: totalParticipantsCount,
         participants: event?.UserEvent.map(userEvent => ({
-            id: userEvent.user.id,
+            userId: userEvent.userId,
             paid: userEvent.paid,
+            createdAt: userEvent.createdAt,
             telegramId: userEvent.user.telegramId,
             allowsWriteToPm: userEvent.user.allowsWriteToPm,
             firstName: userEvent.user.firstName,

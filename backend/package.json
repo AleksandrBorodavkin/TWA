@@ -11,7 +11,7 @@
     "dev": "npx ts-node src/index.ts",
     "pmd": "prisma migrate dev",
     "pgc": "prisma generate",
-    "build": "rimraf ./dist-backend && tsc --outDir ./dist-backend"
+    "build": "rimraf ./dist-backend && tsc"
   },
   "prisma": {
     "schema": "./prisma/schema.prisma"

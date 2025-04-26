@@ -46,7 +46,7 @@ const authMiddleware: RequestHandler = (req, res, next) => {
                 // Validate init data.
                 validate(authData, process.env.BOT_TOKEN!, {
                     // We consider init data sign valid for 1 hour from their creation moment.
-                    expiresIn: 7200,
+                    expiresIn: 3600,
                 });
                 // Parse init data. We will surely need it in the future.
                 setInitData(res, parse(authData));

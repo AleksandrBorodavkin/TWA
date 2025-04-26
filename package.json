@@ -1,6 +1,6 @@
 {
   "name": "eventify",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "workspaces": [
     "./frontend",
@@ -18,5 +18,8 @@
     "luxon": "^3.6.1",
     "rimraf": "^5.0.0",
     "typescript": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.6.2"
   }
 }

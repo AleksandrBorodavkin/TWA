@@ -59,10 +59,12 @@ sudo tail -f /var/log/fail2ban.log
 
 ## Установка 
 ```bash
-#Установить зависимости 
+# Проверить права, если нет, то назначить 
+sudo chown -R nodejs:nodejs /var/www/html
+# Установить зависимости 
 sudo -u nodejs npm install
 #Выполнить миграции
-sudo -u nodejs npm prisma generate
+sudo -u nodejs npx prisma generate
 
 # Произвести тестовый запуск в режиме отладки 
 sudo -u nodejs node /var/www/dist-backend/index.js --debug
@@ -76,10 +78,22 @@ sudo -u nodejs pm2 start backend
 sudo -u nodejs pm2 status backend
 sudo -u nodejs pm2 save
 
+
+
 ```
 До запуска нужно провести миграции для каждого экземпляра
 ```sh
-sudo -u nodejs DATABASE_URL="postgresql://chosen:chosen@localhost:5432/chosen2?schema=public" npx prisma migrate deploy
+sudo -u nodejs DATABASE_URL="postgresql://chosen:chosen@localhost:5432/chosen?schema=public" npx prisma migrate deploy
+sudo -u nodejs DATABASE_URL="postgresql://omerta:omerta@localhost:5432/omerta?schema=public" npx prisma migrate deploy
+
+
+```
+```shell
+psql "postgresql://chosen:chosen@localhost:5432/chosen"
+
+sudo -u nodejs DATABASE_URL="postgresql://chosen:chosen@localhost:5432/chosen?schema=public" npx prisma migrate reset
+sudo -u nodejs DATABASE_URL="postgresql://omerta:omerta@localhost:5432/omerta?schema=public" npx prisma migrate reset
+
 
 ```
 После успешного завершения 

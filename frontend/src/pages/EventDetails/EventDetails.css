@@ -200,6 +200,10 @@ a:hover {
 
     transition: border-color 0.2s, box-shadow 0.2s;
 }
+.editable-input-time{
+    width: 75%;
+}
+
 .editable-input-limit{
     width: 17%;
 }

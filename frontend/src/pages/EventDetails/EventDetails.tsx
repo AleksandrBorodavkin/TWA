@@ -2,12 +2,12 @@ import {Page} from '@/components/Page';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {initData} from "@telegram-apps/sdk-react";
-import {Button, Input, List, Spinner} from "@telegram-apps/telegram-ui";
+import {Button, List, Spinner} from "@telegram-apps/telegram-ui";
 import './EventDetails.css';
 import {getEventDetail} from "@/api/getEventDetails.ts";
 import {addUserToEvent} from "@/api/eventParticipants.ts";
 import {removeUserFromEvent} from "@/api/removeUserFromEvent.ts";
-import {generateIcsFile} from '@/utils/generateIcsFile';
+// import {generateIcsFile} from '@/utils/generateIcsFile';
 import {IEvent} from "@/types/eventTypes.ts";
 import {handlerChangeStatusEvent} from "@/api/changeEventStatus.ts";
 import {markParticipantAsPaid} from "@/api/markParticipantAsPaid.ts";
@@ -31,10 +31,10 @@ export const EventDetails = () => {
     const [editableTitle, setEditableTitle] = useState('');
 
     const [isEditingLimit, setIsEditingLimit] = useState(false);
-    const [editableLimit, setEditableLimit] = useState('');
+    const [editableLimit, setEditableLimit] = useState<number>();
 
     const [isEditingDate, setIsEditingDate] = useState(false);
-    const [editableDate, setEditableDate] = useState();
+    const [editableDate, setEditableDate] = useState<string | undefined>();
 
 
     const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -87,8 +87,8 @@ export const EventDetails = () => {
 
 
                 const currentUserParticipationCount =
-                    currentUserParticipation?.mainParticipantsCount
-                    + currentUserParticipation?.reserveParticipantsCount || 0;
+                    (currentUserParticipation?.mainParticipantsCount??0)
+                    + (currentUserParticipation?.reserveParticipantsCount??0) || 0;
                 setButtonParticipantCount(currentUserParticipationCount)
             } else {
                 setSentStatus('Принять участие');
@@ -99,6 +99,7 @@ export const EventDetails = () => {
     const saveTitleChange = async () => {
         try {
             // вызов API на обновление
+            // @ts-ignore
             await updateEventField(eventDetails.id, {title: editableTitle});
             setIsEditingTitle(false);
             await refreshEventDetails(); // перезагрузка данных
@@ -108,8 +109,9 @@ export const EventDetails = () => {
     };
     const saveDateChange = async () => {
         try {
-            const local = DateTime.fromFormat(editableDate, "yyyy-MM-dd'T'HH:mm", {zone: 'Asia/Bangkok'});
+            const local = DateTime.fromFormat(editableDate!, "yyyy-MM-dd'T'HH:mm", {zone: 'Asia/Bangkok'});
             const utc = local.toUTC();
+            // @ts-ignore
             await updateEventField(eventDetails.id, {date: utc.toISO()});
             setIsEditingDate(false);
             await refreshEventDetails();
@@ -122,6 +124,7 @@ export const EventDetails = () => {
     const saveLimitChange = async () => {
         try {
             // вызов API на обновление
+            // @ts-ignore
             await updateEventField(eventDetails.id, {limit: editableLimit});
             setIsEditingLimit(false);
             await refreshEventDetails(); // перезагрузка данных
@@ -133,6 +136,7 @@ export const EventDetails = () => {
     const saveDescriptionChange = async () => {
         try {
             // вызов API на обновление
+            // @ts-ignore
             await updateEventField(eventDetails.id, {description: editableDescription});
             setIsEditingDescription(false);
             await refreshEventDetails(); // перезагрузка данных
@@ -148,6 +152,7 @@ export const EventDetails = () => {
             const participantData = action === 'add'
                 ? await addUserToEvent(eventId, {id: currentUser.id, username: currentUser.username!})
                 : await removeUserFromEvent(eventId, {id: currentUser.id, username: currentUser.username!});
+            console.log(participantData)
 
 
 //             // @ts-ignore
@@ -265,6 +270,7 @@ export const EventDetails = () => {
 
     const date = new Date(eventDetails.date);
 
+    // @ts-ignore
     return (
         <Page>
             <div className={'section-details'}>
@@ -339,7 +345,7 @@ export const EventDetails = () => {
                     <div className="time ">
                         {isEditingDate ? (
                             <>
-                                <input className="editable-input"
+                                <input className="editable-input editable-input-time"
                                        type="datetime-local"
                                        value={editableDate}
                                        onChange={(e) => setEditableDate(e.target.value)}
@@ -391,7 +397,7 @@ export const EventDetails = () => {
                                    type='number'
 
                                    value={editableLimit}
-                                   onChange={(e) => setEditableLimit(e.target.value)}
+                                   onChange={(e) => setEditableLimit(Number(e.target.value))}
                             />
                             <Button
                                 mode="plain"
@@ -494,64 +500,70 @@ export const EventDetails = () => {
 
 
             <List>
-                {eventDetails?.participants.map((participant, index) => (
-                    <span key={participant.telegramId} className="parent-container">
-<div
-    className={
-        `participant border ${
-            String(participant.telegramId) === String(currentUser?.id) ? 'highlight-participant' : ''
-        }`
-    }
->
-    {/* Левый блок - информация о пользователе */}
-    <div className="participant-info">
-      {participant.userName ? (
-          <a
-              href={"https://t.me/" + participant.userName}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="participant-link"
-          >
-              {index + 1}. {participant.firstName} {participant.lastName}
-              <span className="username">
-            <br/>[{participant.userName}]
-          </span>
-          </a>
-      ) : (
-          <div className="participant-name">
-              {index + 1}. {participant.firstName} {participant.lastName}
-          </div>
-      )}
-    </div>
+                {eventDetails?.participants
+                    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                    .map((participant, index) => (
+                        <span key={participant.telegramId} className="parent-container">
+                <div
+                    className={
+                        `participant border ${
+                            String(participant.telegramId) === String(currentUser?.id) ? 'highlight-participant' : ''
+                        }`
+                    }
+                >
+                    {/* Левый блок - информация о пользователе */}
+                    <div className="participant-info">
+                        {participant.userName ? (
+                            <a
+                                href={"https://t.me/" + participant.userName}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="participant-link"
+                            >
+                                {index + 1}. {participant.firstName} {participant.lastName}
+                                <span className="username">
+                                    <br/>[ {participant.userName} ]
+                                </span>
+                            </a>
+                        ) : (
+                            <div className="participant-name">
+                                {index + 1}. {participant.firstName} {participant.lastName}
 
-    {/* Правый блок - статистика и кнопка */}
-    <div className="participant-meta">
-      <div className="participant-counts">
-        {participant.mainParticipantsCount > 0 && (
-            <span className="main-count">
-                Мест: {participant.mainParticipantsCount}<br/>
-    </span>
+                                <span className="username">
+                                    <br/>[ username отсутствует ]
+                                </span>
+                            </div>
+                        )}
+                    </div>
 
-        )}
-          {participant.reserveParticipantsCount > 0 && (
-              <span className="reserve-count">
-                Резерв: {participant.reserveParticipantsCount}
+                    {/* Правый блок - статистика и кнопка */}
+                    <div className="participant-meta">
+                        <div className="participant-counts">
+                            {participant.mainParticipantsCount > 0 && (
+                                <span className="main-count">
+                                    Мест: {participant.mainParticipantsCount}<br/>
+                                </span>
+                            )}
+                            {participant.reserveParticipantsCount > 0 && (
+                                <span className="reserve-count">
+                                    Резерв: {participant.reserveParticipantsCount}
+                                </span>
+                            )}
+                        </div>
+
+                        {String(currentUser?.id) === String(eventDetails.creator.telegramId) && (
+                            <button
+                                className={participant.paid ? 'paid-button' : 'unpaid-button'}
+                                disabled={isLoading}
+                                onClick={() => handlerMarkParticipantAsPaid(participant.telegramId, !participant.paid)}
+                            >
+                                {participant.paid ? '✓' : '₽'}
+                            </button>
+                        )}
+                    </div>
+                </div>
             </span>
-          )}
-      </div>
-
-        {String(currentUser?.id) === String(eventDetails.creator.telegramId) && (
-            <button
-                className={participant.paid ? 'paid-button' : 'unpaid-button'}
-                disabled={isLoading}
-                onClick={() => handlerMarkParticipantAsPaid(participant.telegramId, !participant.paid)}
-            >
-                {participant.paid ? '✓' : '₽'}
-            </button>
-        )}
-    </div>
-  </div>
-</span>))}
+                    ))}
             </List>
         </Page>
     );

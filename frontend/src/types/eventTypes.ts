@@ -2,6 +2,7 @@ interface IParticipant {
     reserveParticipantsCount: number;
     mainParticipantsCount: number;
     id: number;
+    createdAt: string;
     telegramId: string;
     firstName: string;
     lastName: string;
